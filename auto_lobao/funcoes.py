@@ -1,13 +1,15 @@
 import logging
+import os
 import pandas as pd
 import pyodbc
 import shutil
-import win32com.client as win32
+import zipfile
+#import win32com.client as win32
 
 import segredos
 
-
-FORMAT = '%(asctime)s | %(levelname)s | %(filename)s | %(message)s'
+user_id = os.getlogin()
+FORMAT = f'%(asctime)s | %(levelname)s | %(filename)s | User: {user_id} | %(message)s'
 logging.basicConfig(level=logging.INFO, filename="logs/auto_lobao.log", format=FORMAT)
 
 
@@ -106,12 +108,14 @@ def copia_e_renomeia_arquivo(origem, destino):
     except Exception as e:
         logging.error(f'Ocorreu um erro ao copiar o arquivo: {str(e)}')
 
-def verifica_duplicidade_bov(arquivo, campo_check):
+def verifica_duplicidade_bov(arquivo_zip, arquivo, campo_check):
     try:
-        arquivo_sem_caminho = arquivo.split('\\')[-1].split('.')[0]
+        arquivo_sem_caminho = arquivo_zip.split('\\')[-1].split('.')[0]
 
-        df = pd.read_csv(arquivo, sep=';', encoding='ANSI', quotechar='"', low_memory=False)
-
+        with zipfile.ZipFile(arquivo_zip, 'r') as zip_file:
+            with zip_file.open(arquivo) as txt_file:
+                df = pd.read_csv(txt_file, sep=';', encoding='ANSI', quotechar='"', low_memory=False) 
+        
         contagem_codigos = df.groupby(campo_check).size().reset_index(name='Contagem')
         contagem_codigos = contagem_codigos.sort_values(by='Contagem', ascending=False)
 
@@ -125,6 +129,8 @@ def verifica_duplicidade_bov(arquivo, campo_check):
         total_registros = soma_igual_1 + soma_maior_1
 
         percentual_duplicados = (soma_maior_1 / total_registros) * 100
+        if percentual_duplicados > 1 #maior que 1%
+            logging.warning(f'ATENÇAO: Arquivo {arquivo_sem_caminho} com percentual de {percentual_duplicados:.2f}% duplicados')
 
         resultado = f'Arquivo: {arquivo_sem_caminho} : temos {soma_maior_1} duplicados e {soma_igual_1} sem duplicadas: {percentual_duplicados:.2f}%'
 
@@ -134,3 +140,15 @@ def verifica_duplicidade_bov(arquivo, campo_check):
 
     except Exception as e:
         logging.error(f"Ocorreu um erro no arquivo {arquivo_sem_caminho}: {str(e)}")
+
+
+caminho = 'C:\\JETL\\BASE\\old\\'
+arquivos_colunas = [
+	('BOV_1059_20231025.TXT.zip','BOV_1059.TXT', 'NUMERO_PEDIDO'),
+	('BOV_1065_20231025.TXT.zip','BOV_1065.TXT', 'NUMERO_PEDIDO'),
+	('BOV_6163_20231025.TXT.zip','BOV_6163.TXT', 'cd_item_ordem'),
+	('BOV_6162_20231025.TXT.zip', 'BOV_6162.TXT', 'cd_item_ordem')
+]
+
+for arquivo_zip, arquivo, coluna in arquivos_colunas:
+	verifica_duplicidade_bov(f'{caminho}{arquivo_zip}', arquivo, coluna)
