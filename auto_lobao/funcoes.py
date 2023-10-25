@@ -4,7 +4,7 @@ import pandas as pd
 import pyodbc
 import shutil
 import zipfile
-#import win32com.client as win32
+import win32com.client as win32
 
 import segredos
 
@@ -95,9 +95,6 @@ def executar_sql(comando_sql):
         conexao.close()
     except Exception as e:
         logging.error(f"Ocorreu um erro ao executar o SQL: {str(e)}")
-# Exemplo de uso:
-# comando_sql = "update TB_VALIDA_CARGA_TENDENCIA set DATA_CARGA = convert(varchar, getdate(), 120 )"
-# executar_sql(comando_sql)
 
 def copia_e_renomeia_arquivo(origem, destino):
     try:
@@ -129,7 +126,7 @@ def verifica_duplicidade_bov(arquivo_zip, arquivo, campo_check):
         total_registros = soma_igual_1 + soma_maior_1
 
         percentual_duplicados = (soma_maior_1 / total_registros) * 100
-        if percentual_duplicados > 1 #maior que 1%
+        if percentual_duplicados > 1: #maior que 1pct
             logging.warning(f'ATENÇAO: Arquivo {arquivo_sem_caminho} com percentual de {percentual_duplicados:.2f}% duplicados')
 
         resultado = f'Arquivo: {arquivo_sem_caminho} : temos {soma_maior_1} duplicados e {soma_igual_1} sem duplicadas: {percentual_duplicados:.2f}%'

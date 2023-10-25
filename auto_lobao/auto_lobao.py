@@ -1,8 +1,11 @@
 import logging
 import os
+import warnings
 
 from funcoes import *
+import segredos
 from menu import *
+from modelo_tendencia import *
 
 warnings.filterwarnings('ignore', message="pandas only supports SQLAlchemy connectable .*")
 
@@ -11,6 +14,32 @@ FORMAT = f'%(asctime)s | %(levelname)s | %(filename)s | User: {user_id} | %(mess
 logging.basicConfig(level=logging.INFO, filename="logs/auto_lobao.log", format=FORMAT)
 
 
+data_referencia = (datetime.today()- timedelta(days=1))
+AAAAMMDD_referencia = (datetime.today()- timedelta(days=0)).strftime('%Y%m%d') 
+AAAAMM = (datetime.today()).strftime('%Y%m')
+ultimo_dia_do_mes = (data_referencia.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+dias_faltando = (ultimo_dia_do_mes - data_referencia).days
+hoje = (datetime.today()- timedelta(days=0)).strftime('%d/%m/%Y') 
+
+
+def roda_modelo_tendencia():
+	puxa_deflac_ref()
+	df_real = puxa_dados_real()
+	executa_procedure_sql('SP_CDO_PREPARA_BASE_TEND_VL')
+
+	df = puxa_dados_para_simular()
+	produtos = ['FIBRA', 'NOVA FIBRA']
+	segmentos = ['VAREJO', 'EMPRESARIAL']
+	gestao = ['RSE', 'RCS', 'RNN', 'TLV', 'WEB', 'OUTROS NACIONAIS']
+
+	for produto in produtos:
+		for segmento in segmentos:
+			for gest in gestao:
+				filtraDF_e_CalculaTendencia(df, 'VL', produto, segmento, gest)
+
+	executa_procedure_sql('SP_CDO_PREPARA_BASE_TEND_VL_VLL')
+	montaExcelTendVlVll()
+	executa_procedure_sql('SP_CDO_TEND_VL_VLL_LEGADA_IGUAL_CDO')
 
 def roda_verifica_duplicidade_bov():
 	caminho = 'C:\\JETL\\BASE\\old\\'
@@ -24,8 +53,56 @@ def roda_verifica_duplicidade_bov():
 	for arquivo_zip, arquivo, coluna in arquivos_colunas:
 		verifica_duplicidade_bov(f'{caminho}{arquivo_zip}', arquivo, coluna)
 
+def enviar_email_tend_vl_vll_para_operacoes ():
+	
+	para = segredos.lista_email_vll_nf_to
+	cc = segredos.lista_email_vll_nf_cc
+	assunto = f"Projeção VL e VLL - FIBRA e NOVA FIBRA - {hoje}"
+	anexo = (f'S:\\Resultados\\01_Relatorio Diario\\1 - Base Eventos\\02 - TENDÊNCIA\\Insumos_Tendência\\Tend_VL_VLL_Fibra_NovaFibra_{AAAAMMDD}.xlsx')
+	corpo = f"""
+    <p>Caros,</p>
 
+    <p>Segue o arquivo atualizado com a projeção de VL e de VLL para Fibra Legado e Nova Fibra calculada hoje: {hoje}</p>
+    <p></p>
+    <p></p>
 
+    <p>Att,</p>
+    <p>Lobão, Luiz</p>
+    """
+	enviaEmailComAnexo(para, assunto, corpo, cc, anexo)
+
+def libera_tendencias_processo_legado ():
+	comando_sql = 'update TB_VALIDA_CARGA_TENDENCIA set DATA_CARGA = convert(varchar, getdate(), 120 )'
+	executar_sql(comando_sql)
+
+def tendencias_para_tabela_historico ():
+	nome_procedure = 'dbo.SP_CDO_0003_TENDENCIA_PARA_HISTORICO'
+	param = AAAAMM
+	executa_procedure_sql(nome_procedure, param=None)
+
+def enviar_lista_pdv_outros ():
+	comando_sql = 'select * from [VW_COD_SAP_OUTROS] order by qtd desc'
+
+	conexao = criar_conexao()
+	cursor = conexao.cursor()
+	df=pd.read_sql(comando_sql, conexao)
+	os.makedirs('temp', exist_ok=True)
+	df.to_csv('temp/pdv_outros.csv', sep=';', decimal=',') 
+
+	anexo = r'C:\Users\oi066724\Documents\Python\Automacoes_Lobao\auto_lobao\temp\pdv_outros.csv'
+
+	corpo = """
+		<div>
+			Caros, Segue a lista de PDVs que estão aparecendo como OUTROS na BOV.
+			Favor verificar e atualizar a classificação dos mesmos.
+		</div>
+		<br>
+		<br>
+	"""
+	para = segredos.lista_email_pdv_outros
+	assunto = f'PDVs Outros: {hoje}!'
+
+	enviaEmailComAnexo(para, assunto, corpo, cc=None, File = anexo)
 
 def main():
 	logging.info('Inicio da Execucao')
@@ -40,11 +117,13 @@ def main():
 			a = input('Tecle qualquer tecla para continuar...')
 	
 		elif opcaoSelecionada == '2':
-			print('opção 2 selecionada...')
+			print('opção 2 selecionada...(Calcular tendência HoltWinters)')
+			roda_modelo_tendencia()
 			a = input('Tecle qualquer tecla para continuar...')
 	
 		elif opcaoSelecionada == '3':
-			print('opção 3 selecionada...')
+			print('opção 3 selecionada...(Enviar tendência para Operações)')
+			enviar_email_tend_vl_vll_para_operacoes()
 			a = input('Tecle qualquer tecla para continuar...')
 	
 		elif opcaoSelecionada == '4':
@@ -52,11 +131,13 @@ def main():
 			a = input('Tecle qualquer tecla para continuar...')
 	
 		elif opcaoSelecionada == '5':
-			print('opção 5 selecionada...')
+			print('opção 5 selecionada...(Enviar tendências para tabela de histórico)')
+			tendencias_para_tabela_historico ()
 			a = input('Tecle qualquer tecla para continuar...')
 	
 		elif opcaoSelecionada == '6':
-			print('opção 6 selecionada...')
+			print('opção 6 selecionada...(Libera tendências processo legado)')
+			libera_tendencias_processo_legado ()
 			a = input('Tecle qualquer tecla para continuar...')
 	
 		elif opcaoSelecionada == '7':
@@ -80,7 +161,8 @@ def main():
 			a = input('Tecle qualquer tecla para continuar...')
 	
 		elif opcaoSelecionada == '12':
-			print('opção 13 selecionada...')
+			print('opção 13 selecionada...(Envia Lista de PDV Outros)')
+			enviar_lista_pdv_outros ()
 			a = input('Tecle qualquer tecla para continuar...')
 	
 		elif opcaoSelecionada == '13':

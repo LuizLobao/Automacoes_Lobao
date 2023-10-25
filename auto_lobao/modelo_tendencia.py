@@ -1,5 +1,11 @@
-from datetime import date, datetime, timedelta
+import pandas as pd
+from datetime import datetime, timedelta
 import os
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+import statsmodels.api as sm
+from statsmodels.tsa.seasonal import seasonal_decompose
+from dateutil.relativedelta import relativedelta
+import win32com.client as win32
 
 
 from funcoes import *
@@ -7,6 +13,11 @@ from funcoes import *
 data_referencia = (datetime.today()- timedelta(days=1))
 AAAAMMDD_referencia = (datetime.today()- timedelta(days=0)).strftime('%Y%m%d') 
 AAAAMM = (datetime.today()).strftime('%Y%m')
+AAAAMMDD = (datetime.today()).strftime('%Y%m%d')
+ultimo_dia_do_mes = (data_referencia.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+dias_faltando = (ultimo_dia_do_mes - data_referencia).days
+
+
 
 def puxa_deflac_ref():
 	
@@ -75,7 +86,41 @@ def puxa_deflac_ref():
 	finally:
 		conexao.close()
 
+def CalculaTendencia(df, dias_ate_fim_mes, indicador, PRODUTO, UNIDADE_NEGOCIO, GESTAO):
+    print(f'CalculaTendencia - {indicador}-{PRODUTO}-{UNIDADE_NEGOCIO}-{GESTAO}')
+    #seasonal_decompose(df_b, model='additve', period=7).plot();
+    #localiza o INDICE de uma data especifica para criar a base de TREINO e de TESTE
+    #indice = df_b.index.get_loc('2023-08-01')
+    #train = df_b[:indice]
+    #test = df_b[indice:]
 
+    final_model=ExponentialSmoothing(df.qtd, trend='additive', seasonal='add', seasonal_periods=7).fit()
+    pred=final_model.forecast(dias_ate_fim_mes)
+
+    dff = pred.to_frame()
+    dff = dff.rename(columns = {0:'VALOR'})
+    dff['INDICADOR'] = indicador
+    dff['PRODUTO'] = PRODUTO
+    dff['UNIDADE'] = UNIDADE_NEGOCIO
+    dff['GESTAO'] = GESTAO
+    
+    dff.to_csv(f'C:\\Users\\oi066724\\Documents\\Python\\Tendencia\\TEND_DEFLAC\\tendencia_{AAAAMMDD_referencia}.csv', sep=';',header = False, index = True, mode = 'a')
+
+    # Create a new column with index values
+    dff['DATA'] = dff.index
+    # Using reset_index() to set index into column
+    dff=dff.reset_index()
+    
+    dff['DATA_Ajustada'] = dff['DATA'].dt.strftime('%Y-%m-%d')
+    #print(dff)
+
+    conexao = criar_conexao()
+    #insere no banco os dados de deflação
+    for index, linha in dff.iterrows():
+        conexao.execute('Insert into dbo.TBL_CDO_APOIO_TENDENCIA (DATA, qtd, DS_INDICADOR, DS_PRODUTO, DS_UNIDADE_NEGOCIO, GESTAO) values(?,?,?,?,?,?)',
+                        linha.DATA_Ajustada, linha.VALOR, linha.INDICADOR, linha.PRODUTO, linha.UNIDADE, linha.GESTAO)
+    conexao.commit()
+    
 def excluir_tabela_tendencia(conexao):
 	conexao.execute('delete from dbo.TBL_CDO_APOIO_TENDENCIA')
 	conexao.commit()
@@ -179,7 +224,6 @@ def puxa_dados_para_simular():
 	finally:
 		conexao.close()
 
-
 def montaExcelTendVlVll():
 	comando_sql = f'''select DS_PRODUTO,
 							DS_INDICADOR,
@@ -232,3 +276,33 @@ def montaExcelTendVlVll():
 		logging.error(f"Ocorreu um erro no montaExcelTendVlVll: {e}")
 	finally:
 		conexao.close()
+
+def filtra_df (base, indicador, PRODUTO=None, UNIDADE_NEGOCIO = None, GESTAO = None):
+    print('filtra_df')	
+    
+    df_filtrada=base.query(f'DS_INDICADOR == "{indicador}"')
+    
+    if PRODUTO != None:
+        df_filtrada=df_filtrada.query(f'DS_PRODUTO == "{PRODUTO}"')
+
+    if UNIDADE_NEGOCIO != None:
+        df_filtrada=df_filtrada.query(f'DS_UNIDADE_NEGOCIO == "{UNIDADE_NEGOCIO}"')
+
+    if GESTAO != None:
+        df_filtrada=df_filtrada.query(f'GESTAO == "{GESTAO}"')
+
+    #base apenas com DATA e valor
+    df_filtrada=df_filtrada[['DATA','qtd']]
+    
+    #Soma por DATA
+    df_a=df_filtrada.groupby('DATA').sum()
+
+    #diario 'D' > mensal 'MS'
+    df_b = df_a.resample(rule='D').sum()
+    return df_b
+
+def filtraDF_e_CalculaTendencia(base, indicador, PRODUTO, UNIDADE_NEGOCIO, GESTAO):
+    df_b = filtra_df (base, indicador,PRODUTO, UNIDADE_NEGOCIO, GESTAO)
+
+    dias_ate_fim_mes=dias_faltando
+    CalculaTendencia(df_b, dias_ate_fim_mes, indicador, PRODUTO, UNIDADE_NEGOCIO, GESTAO)		
