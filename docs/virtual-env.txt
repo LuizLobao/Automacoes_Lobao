@@ -1,0 +1,28 @@
+PyEnv
+pip install pyenv-win --target %USERPROFILE%\\.pyenv
+
+
+
+
+https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#:~:text=To%20create%20a%20virtual%20environment,virtualenv%20in%20the%20below%20commands.&text=The%20second%20argument%20is%20the,project%20and%20call%20it%20env%20.
+
+Installing virtualenv
+py -m pip install --user virtualenv
+
+
+Creating a virtual environment
+py -m venv env
+
+
+Activating a virtual environment
+.\env\Scripts\activate
+
+
+Leaving the virtual environment
+deactivate
+
+
+
+
+
+py -m pip freeze
