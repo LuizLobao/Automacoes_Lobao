@@ -1,26 +1,27 @@
 import logging
 import os
-import pandas as pd
-import pyodbc
 import shutil
 import zipfile
+
+import pandas as pd
+import pyodbc
 import win32com.client as win32
 
 import segredos
 
 user_id = os.getlogin()
-FORMAT = f'%(asctime)s | %(levelname)s | %(filename)s | User: {
-    user_id} | %(message)s'
-logging.basicConfig(level=logging.INFO,
-                    filename="logs/auto_lobao.log", format=FORMAT)
+FORMAT = f'%(asctime)s | %(levelname)s | %(filename)s | User: {user_id} | %(message)s'
+logging.basicConfig(
+    level=logging.INFO, filename='logs/auto_lobao.log', format=FORMAT
+)
 
 
 def criar_conexao():
     dados_conexao = (
-        "Driver={SQL Server};"
-        f"Server={segredos.db_server};"
-        f"Database={segredos.db_name};"
-        "Trusted_Connection=yes;"
+        'Driver={SQL Server};'
+        f'Server={segredos.db_server};'
+        f'Database={segredos.db_name};'
+        'Trusted_Connection=yes;'
         # f"UID={segredos.db_user};"
         # f"PWD={segredos.db_pass}"
     )
@@ -41,8 +42,9 @@ def executa_procedure_sql(nome_procedure, param=None):
         logging.info(f'Fim Procedure {nome_procedure}.')
 
     except Exception as e:
-        logging.error(f"Erro ao executar a procedure {
-                      nome_procedure}: {e}")  # TODO trocar por log
+        logging.error(
+            f'Erro ao executar a procedure {nome_procedure}: {e}'
+        )  # TODO trocar por log
 
     finally:
         conexao.close()
@@ -71,8 +73,9 @@ def enviaEmailComAnexo(EmailTo, Subject, Body, EmailCC=None, File=None):
         email.Send()
         logging.info(f'Email enviado com sucesso! Assunto: {Subject}')
     except Exception as e:
-        logging.error(f"Ocorreu um erro ao enviar o email. Assunto {
-                      Subject}: {str(e)}")
+        logging.error(
+            f'Ocorreu um erro ao enviar o email. Assunto {Subject}: {str(e)}'
+        )
 
 
 def executa_arquivo_sql(arquivo_sql):
@@ -88,7 +91,7 @@ def executa_arquivo_sql(arquivo_sql):
             logging.info(f'Arquivo SQL executado: {arquivo_sql}')
 
     except Exception as e:
-        logging.error(f"Erro ao executar o arquivo SQL {arquivo_sql}: {e}")
+        logging.error(f'Erro ao executar o arquivo SQL {arquivo_sql}: {e}')
 
     finally:
         conexao.close()
@@ -102,9 +105,10 @@ def executar_sql(comando_sql):
         conexao.commit()
         conexao.close()
         logging.info(
-            f'Executar SQL executado - codigo executado: {comando_sql}')
+            f'Executar SQL executado - codigo executado: {comando_sql}'
+        )
     except Exception as e:
-        logging.error(f"Ocorreu um erro ao executar o SQL: {str(e)}")
+        logging.error(f'Ocorreu um erro ao executar o SQL: {str(e)}')
 
 
 def copia_e_renomeia_arquivo(origem, destino):
@@ -123,16 +127,26 @@ def verifica_duplicidade_bov(arquivo_zip, arquivo, campo_check):
 
         with zipfile.ZipFile(arquivo_zip, 'r') as zip_file:
             with zip_file.open(arquivo) as txt_file:
-                df = pd.read_csv(txt_file, sep=';', encoding='ANSI',
-                                 quotechar='"', low_memory=False)
+                df = pd.read_csv(
+                    txt_file,
+                    sep=';',
+                    encoding='ANSI',
+                    quotechar='"',
+                    low_memory=False,
+                )
 
-        contagem_codigos = df.groupby(
-            campo_check).size().reset_index(name='Contagem')
+        contagem_codigos = (
+            df.groupby(campo_check).size().reset_index(name='Contagem')
+        )
         contagem_codigos = contagem_codigos.sort_values(
-            by='Contagem', ascending=False)
+            by='Contagem', ascending=False
+        )
 
-        check = contagem_codigos.groupby(
-            'Contagem').size().reset_index(name='check')
+        check = (
+            contagem_codigos.groupby('Contagem')
+            .size()
+            .reset_index(name='check')
+        )
 
         filtro_igual_1 = check['Contagem'] == 1
         filtro_maior_1 = check['Contagem'] > 1
@@ -143,16 +157,17 @@ def verifica_duplicidade_bov(arquivo_zip, arquivo, campo_check):
 
         percentual_duplicados = (soma_maior_1 / total_registros) * 100
         if percentual_duplicados > 1:  # maior que 1pct
-            logging.warning(f'ATENÇAO: Arquivo {arquivo_sem_caminho} com percentual de {
-                            percentual_duplicados:.2f}% duplicados')
+            logging.warning(
+                f'ATENÇAO: Arquivo {arquivo_sem_caminho} com percentual de {percentual_duplicados:.2f}% duplicados'
+            )
 
-        resultado = f'Arquivo: {arquivo_sem_caminho} : temos {soma_maior_1} duplicados e {
-            soma_igual_1} sem duplicadas: {percentual_duplicados:.2f}%'
+        resultado = f'Arquivo: {arquivo_sem_caminho} : temos {soma_maior_1} duplicados e {soma_igual_1} sem duplicadas: {percentual_duplicados:.2f}%'
 
         logging.info(resultado)
 
-        return (percentual_duplicados)
+        return percentual_duplicados
 
     except Exception as e:
-        logging.error(f"Ocorreu um erro no arquivo {
-                      arquivo_sem_caminho}: {str(e)}")
+        logging.error(
+            f'Ocorreu um erro no arquivo {arquivo_sem_caminho}: {str(e)}'
+        )

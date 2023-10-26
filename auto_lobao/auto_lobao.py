@@ -2,26 +2,28 @@ import logging
 import os
 import warnings
 
-from funcoes import *
 import segredos
+from funcoes import *
 from menu import *
 from modelo_tendencia import *
 
 warnings.filterwarnings(
-    'ignore', message="pandas only supports SQLAlchemy connectable .*")
+    'ignore', message='pandas only supports SQLAlchemy connectable .*'
+)
 
 user_id = os.getlogin()
-FORMAT = f'%(asctime)s | %(levelname)s | %(filename)s | User: {
-    user_id} | %(message)s'
-logging.basicConfig(level=logging.INFO,
-                    filename="logs/auto_lobao.log", format=FORMAT)
+FORMAT = f'%(asctime)s | %(levelname)s | %(filename)s | User: {user_id} | %(message)s'
+logging.basicConfig(
+    level=logging.INFO, filename='logs/auto_lobao.log', format=FORMAT
+)
 
 
-data_referencia = (datetime.today() - timedelta(days=1))
+data_referencia = datetime.today() - timedelta(days=1)
 AAAAMMDD_referencia = (datetime.today() - timedelta(days=0)).strftime('%Y%m%d')
 AAAAMM = (datetime.today()).strftime('%Y%m')
-ultimo_dia_do_mes = (data_referencia.replace(day=1) +
-                     timedelta(days=32)).replace(day=1) - timedelta(days=1)
+ultimo_dia_do_mes = (
+    data_referencia.replace(day=1) + timedelta(days=32)
+).replace(day=1) - timedelta(days=1)
 dias_faltando = (ultimo_dia_do_mes - data_referencia).days
 hoje = (datetime.today() - timedelta(days=0)).strftime('%d/%m/%Y')
 
@@ -52,7 +54,7 @@ def roda_verifica_duplicidade_bov():
         ('BOV_1059_20231025.TXT.zip', 'BOV_1059.TXT', 'NUMERO_PEDIDO'),
         ('BOV_1065_20231025.TXT.zip', 'BOV_1065.TXT', 'NUMERO_PEDIDO'),
         ('BOV_6163_20231025.TXT.zip', 'BOV_6163.TXT', 'cd_item_ordem'),
-        ('BOV_6162_20231025.TXT.zip', 'BOV_6162.TXT', 'cd_item_ordem')
+        ('BOV_6162_20231025.TXT.zip', 'BOV_6162.TXT', 'cd_item_ordem'),
     ]
 
     for arquivo_zip, arquivo, coluna in arquivos_colunas:
@@ -63,9 +65,8 @@ def enviar_email_tend_vl_vll_para_operacoes():
 
     para = segredos.lista_email_vll_nf_to
     cc = segredos.lista_email_vll_nf_cc
-    assunto = f"Projeção VL e VLL - FIBRA e NOVA FIBRA - {hoje}"
-    anexo = (
-        f'S:\\Resultados\\01_Relatorio Diario\\1 - Base Eventos\\02 - TENDÊNCIA\\Insumos_Tendência\\Tend_VL_VLL_Fibra_NovaFibra_{AAAAMMDD}.xlsx')
+    assunto = f'Projeção VL e VLL - FIBRA e NOVA FIBRA - {hoje}'
+    anexo = f'S:\\Resultados\\01_Relatorio Diario\\1 - Base Eventos\\02 - TENDÊNCIA\\Insumos_Tendência\\Tend_VL_VLL_Fibra_NovaFibra_{AAAAMMDD}.xlsx'
     corpo = f"""
 <p>Caros,</p>
 
@@ -140,7 +141,8 @@ def criar_arquivo_ofertas_vs_depara_ticket():
     df = pd.read_sql(comando_sql, conexao)
     os.makedirs('temp', exist_ok=True)
     df.to_csv(
-        f'temp/oferta_vs_depara_ticket_var_{AAAAMM}.csv', sep=';', decimal=',')
+        f'temp/oferta_vs_depara_ticket_var_{AAAAMM}.csv', sep=';', decimal=','
+    )
 
     comando_sql = f'exec dbo.SP_PC_LISTAR_OFERTAS_VS_DEPARA_RC_EMP {AAAAMM}'
     conexao = criar_conexao()
@@ -148,7 +150,8 @@ def criar_arquivo_ofertas_vs_depara_ticket():
     df = pd.read_sql(comando_sql, conexao)
     os.makedirs('temp', exist_ok=True)
     df.to_csv(
-        f'temp/oferta_vs_depara_ticket_emp_{AAAAMM}.csv', sep=';', decimal=',')
+        f'temp/oferta_vs_depara_ticket_emp_{AAAAMM}.csv', sep=';', decimal=','
+    )
 
     logging.info('FIM criar_arquivo_ofertas_vs_depara_ticket.')
 
@@ -162,7 +165,8 @@ def main():
         opcaoSelecionada = menu()
         if opcaoSelecionada == '1':
             print(
-                'opção 1 selecionada...(Verificando duplicidades na BOV - consultar log)')
+                'opção 1 selecionada...(Verificando duplicidades na BOV - consultar log)'
+            )
             roda_verifica_duplicidade_bov()
             a = input('Tecle qualquer tecla para continuar...')
 
@@ -181,7 +185,9 @@ def main():
             a = input('Tecle qualquer tecla para continuar...')
 
         elif opcaoSelecionada == '5':
-            print('opção 5 selecionada...(Enviar tendências para tabela de histórico)')
+            print(
+                'opção 5 selecionada...(Enviar tendências para tabela de histórico)'
+            )
             tendencias_para_tabela_historico()
             a = input('Tecle qualquer tecla para continuar...')
 
@@ -227,5 +233,5 @@ def main():
 
 
 # Verifique se o script está sendo executado diretamente (não importado)
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
