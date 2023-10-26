@@ -13,8 +13,8 @@ def menu():
 	print('5) Enviar tendências para tabela de histórico')
 	print('6) Libera tendências processo legado')
 	print('--------------- Atividades Receita Contratada -----------------------')
-	print('xxx) Procedures Receita Contratada')
-	print('')
+	print('9) Procedures Receita Contratada')
+	print('10) Gerar tabelas Ofertas vs De-Para Ticket')
 	print('')
 	print('--------------- Atividades Cargas de Metas/Orçamento ----------------')
 	print('')
@@ -28,6 +28,7 @@ def menu():
 	print('---------------------------------------------------------------------')
 	print('13) Sair')
 	print('-------------------------------------------------------------------')
-	selecionada =  input(('Selecione uma das opções acima: #'))
+	
+	selecionada =  input('Selecione uma das opções acima: #')
 	
 	return selecionada

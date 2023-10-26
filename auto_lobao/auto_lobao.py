@@ -72,15 +72,18 @@ def enviar_email_tend_vl_vll_para_operacoes ():
 	enviaEmailComAnexo(para, assunto, corpo, cc, anexo)
 
 def libera_tendencias_processo_legado ():
+	logging.info('Libera tendencia do processo legado.')
 	comando_sql = 'update TB_VALIDA_CARGA_TENDENCIA set DATA_CARGA = convert(varchar, getdate(), 120 )'
 	executar_sql(comando_sql)
 
 def tendencias_para_tabela_historico ():
+	logging.info('Envia tendencia para tabela historico.')
 	nome_procedure = 'dbo.SP_CDO_0003_TENDENCIA_PARA_HISTORICO'
 	param = AAAAMM
 	executa_procedure_sql(nome_procedure, param=None)
 
 def enviar_lista_pdv_outros ():
+	logging.info('Envia lista pdv OUTROS.')
 	comando_sql = 'select * from [VW_COD_SAP_OUTROS] order by qtd desc'
 
 	conexao = criar_conexao()
@@ -89,7 +92,7 @@ def enviar_lista_pdv_outros ():
 	os.makedirs('temp', exist_ok=True)
 	df.to_csv('temp/pdv_outros.csv', sep=';', decimal=',') 
 
-	anexo = r'C:\Users\oi066724\Documents\Python\Automacoes_Lobao\auto_lobao\temp\pdv_outros.csv'
+	anexo = r'C:\Users\oi066724\Documents\Python\Automacoes_Lobao\temp\pdv_outros.csv'
 
 	corpo = """
 		<div>
@@ -102,8 +105,40 @@ def enviar_lista_pdv_outros ():
 	para = segredos.lista_email_pdv_outros
 	assunto = f'PDVs Outros: {hoje}!'
 
-	enviaEmailComAnexo(para, assunto, corpo, cc=None, File = anexo)
+	enviaEmailComAnexo(para, assunto, corpo, EmailCC=None, File = anexo)
 
+def rotinas_receita_contratada():
+	proc = 'SP_PC_Update_Ticket_Fibra_VAREJO_Tendencia_porRegiao'
+	executa_procedure_sql(proc, AAAAMM)
+	proc = 'SP_PC_Update_Ticket_Fibra_EMPRESARIAL_Tendencia_porRegiao_IndCombo'
+	executa_procedure_sql(proc, AAAAMM)
+	#proc = 'SP_PC_Update_Ticket_Fibra_VAREJO_DIARIO_porRegiao'
+	#executa_procedure_sql(proc, AAAAMM)
+	#proc = 'SP_PC_Update_Ticket_Fibra_EMPRESARIAL_DIARIO_porRegiao_IndCombo'
+	#executa_procedure_sql(proc, AAAAMM)
+	proc = 'SP_PC_TBL_RE_RELATORIO_RC_V2_TEND'
+	executa_procedure_sql(proc, AAAAMM)
+
+def criar_arquivo_ofertas_vs_depara_ticket():
+	logging.info('Inicia criar_arquivo_ofertas_vs_depara_ticket.')
+
+	comando_sql = f'exec dbo.SP_PC_LISTAR_OFERTAS_VS_DEPARA_RC_VAR {AAAAMM}'
+	conexao = criar_conexao()
+	cursor = conexao.cursor()
+	df=pd.read_sql(comando_sql, conexao)
+	os.makedirs('temp', exist_ok=True)
+	df.to_csv(f'temp/oferta_vs_depara_ticket_var_{AAAAMM}.csv', sep=';', decimal=',') 
+
+	comando_sql = f'exec dbo.SP_PC_LISTAR_OFERTAS_VS_DEPARA_RC_EMP {AAAAMM}'
+	conexao = criar_conexao()
+	cursor = conexao.cursor()
+	df=pd.read_sql(comando_sql, conexao)
+	os.makedirs('temp', exist_ok=True)
+	df.to_csv(f'temp/oferta_vs_depara_ticket_emp_{AAAAMM}.csv', sep=';', decimal=',')
+
+	logging.info('FIM criar_arquivo_ofertas_vs_depara_ticket.')
+
+	
 def main():
 	logging.info('Inicio da Execucao')
 	# Seu código principal começa aqui
@@ -149,11 +184,13 @@ def main():
 			a = input('Tecle qualquer tecla para continuar...')
 	
 		elif opcaoSelecionada == '9':
-			print('opção 9 selecionada...')
+			print('opção 9 selecionada...(Procedures Receita Contratada)')
+			rotinas_receita_contratada()
 			a = input('Tecle qualquer tecla para continuar...')
 	
 		elif opcaoSelecionada == '10':
 			print('opção 10 selecionada...')
+			criar_arquivo_ofertas_vs_depara_ticket()
 			a = input('Tecle qualquer tecla para continuar...')
 	
 		elif opcaoSelecionada == '11':
@@ -167,6 +204,7 @@ def main():
 	
 		elif opcaoSelecionada == '13':
 			print('Opção 13...SAIR')
+			logging.info('Opcao SAIR selecionada no menu.')
 			break
 		
 		else:

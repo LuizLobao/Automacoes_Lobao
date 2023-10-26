@@ -30,15 +30,16 @@ def executa_procedure_sql(nome_procedure, param=None):
 
     try:
         cursor = conexao.cursor()
+        logging.info(f'Inicio Procedure {nome_procedure}.')
         if param:
             cursor.execute(f'SET NOCOUNT ON; EXEC {nome_procedure} {param}')
         else:
             cursor.execute(f'SET NOCOUNT ON; EXEC {nome_procedure}')
         conexao.commit()
-        logging.info(f'Procedure {nome_procedure} executada.')
+        logging.info(f'Fim Procedure {nome_procedure}.')
     
     except Exception as e:
-        logging.error(f"Erro ao executar a procedure: {e}") #TODO trocar por log
+        logging.error(f"Erro ao executar a procedure {nome_procedure}: {e}") #TODO trocar por log
     
     finally:
         conexao.close()
@@ -64,9 +65,9 @@ def enviaEmailComAnexo(EmailTo, Subject, Body, EmailCC=None, File=None):
             email.Attachments.Add(File)
 
         email.Send()
-        logging.info("Email enviado com sucesso!")
+        logging.info(f'Email enviado com sucesso! Assunto: {Subject}')
     except Exception as e:
-        logging.error(f"Ocorreu um erro ao enviar o email: {str(e)}")
+        logging.error(f"Ocorreu um erro ao enviar o email. Assunto {Subject}: {str(e)}")
 
 def executa_arquivo_sql(arquivo_sql):
     conexao = criar_conexao()
@@ -78,9 +79,10 @@ def executa_arquivo_sql(arquivo_sql):
             cursor = conexao.cursor()
             cursor.execute(conteudo_sql)
             conexao.commit()
+            logging.info(f'Arquivo SQL executado: {arquivo_sql}')
 
     except Exception as e:
-        logging.error(f"Erro ao executar o arquivo SQL: {e}")
+        logging.error(f"Erro ao executar o arquivo SQL {arquivo_sql}: {e}")
     
     finally:
         conexao.close()
@@ -88,11 +90,11 @@ def executa_arquivo_sql(arquivo_sql):
 def executar_sql(comando_sql):
     try:
         conexao = criar_conexao()
-        logging.info("Conectado ao banco para executar SQL")
         cursor = conexao.cursor()
         cursor.execute(comando_sql)
         conexao.commit()
         conexao.close()
+        logging.info(f'Executar SQL executado - codigo executado: {comando_sql}')
     except Exception as e:
         logging.error(f"Ocorreu um erro ao executar o SQL: {str(e)}")
 
@@ -137,15 +139,3 @@ def verifica_duplicidade_bov(arquivo_zip, arquivo, campo_check):
 
     except Exception as e:
         logging.error(f"Ocorreu um erro no arquivo {arquivo_sem_caminho}: {str(e)}")
-
-
-caminho = 'C:\\JETL\\BASE\\old\\'
-arquivos_colunas = [
-	('BOV_1059_20231025.TXT.zip','BOV_1059.TXT', 'NUMERO_PEDIDO'),
-	('BOV_1065_20231025.TXT.zip','BOV_1065.TXT', 'NUMERO_PEDIDO'),
-	('BOV_6163_20231025.TXT.zip','BOV_6163.TXT', 'cd_item_ordem'),
-	('BOV_6162_20231025.TXT.zip', 'BOV_6162.TXT', 'cd_item_ordem')
-]
-
-for arquivo_zip, arquivo, coluna in arquivos_colunas:
-	verifica_duplicidade_bov(f'{caminho}{arquivo_zip}', arquivo, coluna)
