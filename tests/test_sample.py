@@ -1,13 +1,16 @@
-from auto_lobao.funcoes import *
-from auto_lobao.modelo_tendencia import *
-from auto_lobao.modelo_tendencia import *
+from . auto_lobao import *
 
 
+import pytest
+import pyodbc
 
-def test_meu_primeiro_teste():
-    assert 1 == 1
 
-
-def test_meu_segundo_teste():
-    assert 2 == 2
-
+@pytest.mark.parametrize('server, db_name, expected_result', [
+    ('SQLPW90DB03\DBINST3, 1443', 'BDintelicanais', True),  # Defina os valores de teste e o resultado esperado
+    ('SQLPW90DB03\DBINST3, 1443', 'BDQualivendas', True),
+    ('invalid_server', 'invalid_db', False),
+])
+def test_criar_conexao(server, db_name, expected_result):
+    # Substitua 'seu_modulo' pelo nome do módulo onde a função criar_conexao está definida
+    # Certifique-se de configurar 'segredos.db_server' e 'segredos.db_name' adequadamente para seus testes
+    assert bool(criar_conexao(server, db_name)) == expected_result

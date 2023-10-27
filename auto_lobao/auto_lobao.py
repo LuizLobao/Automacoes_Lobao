@@ -26,6 +26,7 @@ ultimo_dia_do_mes = (
 ).replace(day=1) - timedelta(days=1)
 dias_faltando = (ultimo_dia_do_mes - data_referencia).days
 hoje = (datetime.today() - timedelta(days=0)).strftime('%d/%m/%Y')
+AAAAMMDD = (datetime.today()).strftime('%Y%m%d')
 
 
 def roda_modelo_tendencia():
@@ -51,10 +52,10 @@ def roda_modelo_tendencia():
 def roda_verifica_duplicidade_bov():
     caminho = 'C:\\JETL\\BASE\\old\\'
     arquivos_colunas = [
-        ('BOV_1059_20231025.TXT.zip', 'BOV_1059.TXT', 'NUMERO_PEDIDO'),
-        ('BOV_1065_20231025.TXT.zip', 'BOV_1065.TXT', 'NUMERO_PEDIDO'),
-        ('BOV_6163_20231025.TXT.zip', 'BOV_6163.TXT', 'cd_item_ordem'),
-        ('BOV_6162_20231025.TXT.zip', 'BOV_6162.TXT', 'cd_item_ordem'),
+        (f'BOV_1059_{AAAAMMDD}.TXT.zip', 'BOV_1059.TXT', 'NUMERO_PEDIDO'),
+        (f'BOV_1065_{AAAAMMDD}.TXT.zip', 'BOV_1065.TXT', 'NUMERO_PEDIDO'),
+        (f'BOV_6163_{AAAAMMDD}.TXT.zip', 'BOV_6163.TXT', 'cd_item_ordem'),
+        (f'BOV_6162_{AAAAMMDD}.TXT.zip', 'BOV_6162.TXT', 'cd_item_ordem'),
     ]
 
     for arquivo_zip, arquivo, coluna in arquivos_colunas:
@@ -226,6 +227,7 @@ def main():
         elif opcaoSelecionada == '13':
             print('Opção 13...SAIR')
             logging.info('Opcao SAIR selecionada no menu.')
+            subprocess.run('cls', shell=True)
             break
 
         else:
