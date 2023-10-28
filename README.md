@@ -14,25 +14,26 @@
 
 O projeto ainda está em desenvolvimento e as próximas atualizações serão voltadas nas seguintes tarefas:
 
+📈 Tendência de Vendas e Instalação:
 - [x] Verificar duplicidades na base informacional antes da carga
 - [x] Cálculo de tendência de vendas usando modelo HoltWinters
 - [x] Envio da tendência por e-mail para equipe de Operações
 - [ ] Atualização da tendência de Instalações (enviada pelo time de Operações)
 - [x] Copiar tendências para tabela histórica
 - [x] Atualiza tabela do banco utilizada para liberar a tendência para demais rotinas
-
+💰Receita Contratada:
 - [x] Execução de procedure para revisão/ajuste de ticket para Receita Contratada
 - [x] Gerar tabelas Ofertas vs De-Para Ticket
-
+🏪Ajustes de PDV:
 - [ ] Montar tabela de PDVs classificados como OUTROS para equipe responsável
 - [ ] Preparação e carga da lista de PDVs revisadas
-
+🎯Metas e Orçamentos:
 - [ ] Preparação e carga de Metas mensal
 - [ ] Preparação e carga de Metas diária
-
-- [ ] 
-- [ ] 
-- [ ] 
+🖥️Dashboard e Reports
+- [ ] Criação de Dashboard
+- [ ] Reports de direcionamento de vendas
+- [ ] item 3
 
 ## 💻 Pré-requisitos
 
