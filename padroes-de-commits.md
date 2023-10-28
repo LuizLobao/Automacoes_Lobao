@@ -312,5 +312,5 @@ O commit semântico possui os elementos estruturais abaixo (tipos), que informam
 
 ## Contribuição ✨
 
-Ajude a comunidade tornando este projeto ainda mais incrível. Leia como contribuir clicando **[aqui](https://github.com/iuricode/padroes-de-commits/blob/main/CONTRIBUTING.md)** e a **[licença](https://github.com/iuricode/padroes-de-commits/blob/main/LICENSE.md)**. Estou convencido de que juntos alcançaremos coisas incríveis!
+Ajude a comunidade tornando este projeto ainda mais incrível. Leia como contribuir clicando **[aqui](https://github.com/LuizLobao/Automacoes_Lobao/blob/master/CONTRIBUTING.md)** e a **[licença](https://github.com/LuizLobao/Automacoes_Lobao/blob/main/LICENSE.md)**. Estou convencido de que juntos alcançaremos coisas incríveis!
 
