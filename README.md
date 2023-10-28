@@ -1,6 +1,4 @@
-##Auto Lobão
-
-# Nome do projeto
+# Auto Lobão
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/iuricode/README-template?style=for-the-badge)
 ![GitHub language count](https://img.shields.io/github/languages/count/iuricode/README-template?style=for-the-badge)
@@ -10,34 +8,44 @@
 
 <img src="imagem.png" alt="Exemplo imagem">
 
-> Linha adicional de texto informativo sobre o que o projeto faz. Sua introdução deve ter cerca de 2 ou 3 linhas. Não exagere, as pessoas não vão ler.
+> Automações de rotinas de atividades. Verificações e tratamento de arquivos, cargas de bases em DB, envio de e-mails, cálculos de tendências de vendas...
 
 ### Ajustes e melhorias
 
 O projeto ainda está em desenvolvimento e as próximas atualizações serão voltadas nas seguintes tarefas:
 
-- [x] Tarefa 1
-- [x] Tarefa 2
-- [x] Tarefa 3
-- [ ] Tarefa 4
-- [ ] Tarefa 5
+- [x] Verificar duplicidades na base informacional antes da carga
+- [x] Cálculo de tendência de vendas usando modelo HoltWinters
+- [x] Envio da tendência por e-mail para equipe de Operações
+- [ ] Atualização da tendência de Instalações (enviada pelo time de Operações)
+- [x] Copiar tendências para tabela histórica
+- [x] Atualiza tabela do banco utilizada para liberar a tendência para demais rotinas
+
+- [x] Execução de procedure para revisão/ajuste de ticket para Receita Contratada
+- [x] Gerar tabelas Ofertas vs De-Para Ticket
+
+- [ ] Montar tabela de PDVs classificados como OUTROS para equipe responsável
+- [ ] Preparação e carga da lista de PDVs revisadas
+
+- [ ] Preparação e carga de Metas mensal
+- [ ] Preparação e carga de Metas diária
+
+- [ ] 
+- [ ] 
+- [ ] 
 
 ## 💻 Pré-requisitos
 
 Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
-* Você instalou a versão mais recente de `<linguagem / dependência / requeridos>`
-* Você tem uma máquina `<Windows / Linux / Mac>`. Indique qual sistema operacional é compatível / não compatível.
-* Você leu `<guia / link / documentação_relacionada_ao_projeto>`.
+* Sugestão: criar um ambiente virtual. [Guia Rápido](https://github.com/LuizLobao/Automacoes_Lobao/blob/master/docs/virtual-env.txt)
+* Você instalou a versão do `<Python>` informado [aqui](https://github.com/LuizLobao/Automacoes_Lobao/blob/master/.python-version)
+* Instalar os pacotes informados no [Requirements](https://github.com/LuizLobao/Automacoes_Lobao/blob/master/requirements.txt)
 
-## 🚀 Instalando <nome_do_projeto>
 
-Para instalar o <nome_do_projeto>, siga estas etapas:
+## 🚀 Instalando <Auto Lobão>
 
-Linux e macOS:
-```
-<comando_de_instalação>
-```
+Para instalar o <Auto Lobão>, siga estas etapas:
 
 Windows:
 ```
