@@ -1,7 +1,6 @@
 *.bak
 *.exe
 *.pyc
-*.png
 *.log
 
 segredos.py
