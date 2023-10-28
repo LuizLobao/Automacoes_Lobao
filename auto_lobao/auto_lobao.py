@@ -1,3 +1,4 @@
+import configparser
 import logging
 import os
 import warnings
@@ -6,6 +7,9 @@ import segredos
 from funcoes import *
 from menu import *
 from modelo_tendencia import *
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 warnings.filterwarnings(
     'ignore', message='pandas only supports SQLAlchemy connectable .*'
@@ -50,7 +54,8 @@ def roda_modelo_tendencia():
 
 
 def roda_verifica_duplicidade_bov():
-    caminho = 'C:\\JETL\\BASE\\old\\'
+    #caminho = 'C:\\JETL\\BASE\\old\\'
+    caminho = config.get('Configuracoes', 'base_bov_check_dup')
     arquivos_colunas = [
         (f'BOV_1059_{AAAAMMDD}.TXT.zip', 'BOV_1059.TXT', 'NUMERO_PEDIDO'),
         (f'BOV_1065_{AAAAMMDD}.TXT.zip', 'BOV_1065.TXT', 'NUMERO_PEDIDO'),
