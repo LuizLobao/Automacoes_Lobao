@@ -72,7 +72,8 @@ def enviar_email_tend_vl_vll_para_operacoes():
     para = segredos.lista_email_vll_nf_to
     cc = segredos.lista_email_vll_nf_cc
     assunto = f'Projeção VL e VLL - FIBRA e NOVA FIBRA - {hoje}'
-    anexo = f'S:\\Resultados\\01_Relatorio Diario\\1 - Base Eventos\\02 - TENDÊNCIA\\Insumos_Tendência\\Tend_VL_VLL_Fibra_NovaFibra_{AAAAMMDD}.xlsx'
+    dir_rede = config.get('Configuracoes', 'dir_rede_insumo_tend')
+    anexo = f'{dir_rede}Tend_VL_VLL_Fibra_NovaFibra_{AAAAMMDD}.xlsx'
     corpo = f"""
 <p>Caros,</p>
 

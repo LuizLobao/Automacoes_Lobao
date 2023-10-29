@@ -158,7 +158,7 @@ def verifica_duplicidade_bov(arquivo_zip, arquivo, campo_check):
         percentual_duplicados = (soma_maior_1 / total_registros) * 100
         if percentual_duplicados > 1:  # maior que 1pct
             logging.warning(
-                f'ATENÇAO: Arquivo {arquivo_sem_caminho} com percentual de {percentual_duplicados:.2f}% duplicados'
+                f'ATENCAO: Arquivo {arquivo_sem_caminho} com percentual de {percentual_duplicados:.2f}% duplicados'
             )
 
         resultado = f'Arquivo: {arquivo_sem_caminho} : temos {soma_maior_1} duplicados e {soma_igual_1} sem duplicadas: {percentual_duplicados:.2f}%'
