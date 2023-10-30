@@ -9,7 +9,8 @@ from menu import *
 from modelo_tendencia import *
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('auto_lobao/config.ini')
+
 
 warnings.filterwarnings(
     'ignore', message='pandas only supports SQLAlchemy connectable .*'
@@ -55,7 +56,8 @@ def roda_modelo_tendencia():
 
 def roda_verifica_duplicidade_bov():
     #caminho = 'C:\\JETL\\BASE\\old\\'
-    caminho = config.get('Configuracoes', 'base_bov_check_dup')
+    caminho = config['DEFAULT']['base_bov_check_dup']
+    
     arquivos_colunas = [
         (f'BOV_1059_{AAAAMMDD}.TXT.zip', 'BOV_1059.TXT', 'NUMERO_PEDIDO'),
         (f'BOV_1065_{AAAAMMDD}.TXT.zip', 'BOV_1065.TXT', 'NUMERO_PEDIDO'),
@@ -64,7 +66,7 @@ def roda_verifica_duplicidade_bov():
     ]
 
     for arquivo_zip, arquivo, coluna in arquivos_colunas:
-        verifica_duplicidade_bov(f'{caminho}{arquivo_zip}', arquivo, coluna)
+        verifica_duplicidade_bov(fr'{caminho}{arquivo_zip}', arquivo, coluna)
 
 
 def enviar_email_tend_vl_vll_para_operacoes():
@@ -72,7 +74,7 @@ def enviar_email_tend_vl_vll_para_operacoes():
     para = segredos.lista_email_vll_nf_to
     cc = segredos.lista_email_vll_nf_cc
     assunto = f'Projeção VL e VLL - FIBRA e NOVA FIBRA - {hoje}'
-    dir_rede = config.get('Configuracoes', 'dir_rede_insumo_tend')
+    dir_rede = config['DEFAULT']['dir_rede_insumo_tend']
     anexo = f'{dir_rede}Tend_VL_VLL_Fibra_NovaFibra_{AAAAMMDD}.xlsx'
     corpo = f"""
 <p>Caros,</p>
