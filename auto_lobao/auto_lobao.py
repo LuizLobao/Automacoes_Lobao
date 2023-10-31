@@ -9,7 +9,7 @@ from menu import *
 from modelo_tendencia import *
 
 config = configparser.ConfigParser()
-config.read('auto_lobao/config.ini')
+config.read('auto_lobao/config.ini', encoding='utf-8')
 
 
 warnings.filterwarnings(
@@ -55,7 +55,6 @@ def roda_modelo_tendencia():
 
 
 def roda_verifica_duplicidade_bov():
-    #caminho = 'C:\\JETL\\BASE\\old\\'
     caminho = config['DEFAULT']['base_bov_check_dup']
     
     arquivos_colunas = [
@@ -76,6 +75,7 @@ def enviar_email_tend_vl_vll_para_operacoes():
     assunto = f'Projeção VL e VLL - FIBRA e NOVA FIBRA - {hoje}'
     dir_rede = config['DEFAULT']['dir_rede_insumo_tend']
     anexo = f'{dir_rede}Tend_VL_VLL_Fibra_NovaFibra_{AAAAMMDD}.xlsx'
+    print(anexo)
     corpo = f"""
 <p>Caros,</p>
 
@@ -96,10 +96,10 @@ def libera_tendencias_processo_legado():
 
 
 def tendencias_para_tabela_historico():
-    logging.info('Envia tendencia para tabela historico.')
     nome_procedure = 'dbo.SP_CDO_0003_TENDENCIA_PARA_HISTORICO'
     param = AAAAMM
-    executa_procedure_sql(nome_procedure, param=None)
+    logging.info(f'Envia tendencia para tabela historico - {param}')
+    executa_procedure_sql(nome_procedure, param)
 
 
 def enviar_lista_pdv_outros():
@@ -190,7 +190,7 @@ def main():
             a = input('Tecle qualquer tecla para continuar...')
 
         elif opcaoSelecionada == '4':
-            print('opção 4 selecionada...')
+            print('opção 4 selecionada...EM DESENVOLVIMENTO')
             a = input('Tecle qualquer tecla para continuar...')
 
         elif opcaoSelecionada == '5':
@@ -206,11 +206,11 @@ def main():
             a = input('Tecle qualquer tecla para continuar...')
 
         elif opcaoSelecionada == '7':
-            print('opção 7 selecionada...')
+            print('opção 7 selecionada...EM DESENVOLVIMENTO')
             a = input('Tecle qualquer tecla para continuar...')
 
         elif opcaoSelecionada == '8':
-            print('opção 8 selecionada...')
+            print('opção 8 selecionada...EM DESENVOLVIMENTO')
             a = input('Tecle qualquer tecla para continuar...')
 
         elif opcaoSelecionada == '9':
@@ -219,12 +219,12 @@ def main():
             a = input('Tecle qualquer tecla para continuar...')
 
         elif opcaoSelecionada == '10':
-            print('opção 10 selecionada...')
+            print('opção 10 selecionada...(Criar Arquivo de Ofertas vs DE-PARA)')
             criar_arquivo_ofertas_vs_depara_ticket()
             a = input('Tecle qualquer tecla para continuar...')
 
         elif opcaoSelecionada == '11':
-            print('opção 11 selecionada...')
+            print('opção 11 selecionada...EM DESENVOLVIMENTO')
             a = input('Tecle qualquer tecla para continuar...')
 
         elif opcaoSelecionada == '12':
