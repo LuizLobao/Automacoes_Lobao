@@ -1,4 +1,5 @@
 import os
+import configparser
 from datetime import datetime, timedelta
 
 import pandas as pd
@@ -9,6 +10,11 @@ from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from statsmodels.tsa.seasonal import seasonal_decompose
 
 from funcoes import *
+
+
+config = configparser.ConfigParser()
+config.read('auto_lobao/config.ini', encoding='utf-8')
+
 
 data_referencia = datetime.today() - timedelta(days=1)
 AAAAMMDD_referencia = (datetime.today() - timedelta(days=0)).strftime('%Y%m%d')
@@ -314,8 +320,21 @@ def montaExcelTendVlVll():
             margins=True,
             margins_name='TOTAL',
         )
-        dest_filename = f'S:\\Resultados\\01_Relatorio Diario\\1 - Base Eventos\\02 - TENDÊNCIA\\Insumos_Tendência\\Tend_VL_VLL_Fibra_NovaFibra_{AAAAMMDD}.xlsx'
-        with pd.ExcelWriter(dest_filename) as writer:
+        
+        dir_insumo_tend = config['DEFAULT']['dir_rede_insumo_tend']
+        dest_filename = f'Tend_VL_VLL_Fibra_NovaFibra_{AAAAMMDD}.xlsx'
+        full_dest_path = os.path.join(dir_insumo_tend, dest_filename)
+        
+        if os.path.exists(full_dest_path):
+            # Se o arquivo já existe, determine o próximo número sequencial
+            base, ext = os.path.splitext(full_dest_path)
+            version = 1
+            while os.path.exists(f"{base}-v{version}{ext}"):
+                version += 1
+            new_dest_path = f"{base}-v{version}{ext}"
+            os.rename(full_dest_path, new_dest_path)
+        
+        with pd.ExcelWriter(full_dest_path) as writer:
             df.to_excel(
                 writer, sheet_name='DADOS', startcol=0, startrow=0, index=0
             )
