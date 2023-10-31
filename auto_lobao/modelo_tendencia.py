@@ -274,19 +274,19 @@ def puxa_dados_para_simular():
 
 
 def montaExcelTendVlVll():
-    comando_sql = f"""select DS_PRODUTO,
-							DS_INDICADOR,
-							DS_UNIDADE_NEGOCIO,
-							NO_CURTO_TERRITORIO as FILIAL,
-							sum(qtd) as QTD,
-							TS_ATUALIZACAO
-					FROM TBL_CDO_fisicos_tendencia
-					where DT_ANOMES = '{AAAAMM}' and DS_DET_INDICADOR <> 'MIG BASE' and DS_INDICADOR <> 'gross'
-					group by DS_PRODUTO,
-						DS_INDICADOR,
-						DS_UNIDADE_NEGOCIO,
-						NO_CURTO_TERRITORIO,
-						TS_ATUALIZACAO"""
+    comando_sql = f'''select DS_PRODUTO,
+                            DS_INDICADOR,
+                            DS_UNIDADE_NEGOCIO,
+                            NO_CURTO_TERRITORIO as FILIAL,
+                            sum(qtd) as QTD,
+                            TS_ATUALIZACAO
+                    FROM TBL_CDO_fisicos_tendencia
+                    where DT_ANOMES = '{AAAAMM}' and DS_DET_INDICADOR <> 'MIG BASE' and DS_INDICADOR <> 'gross'
+                    group by DS_PRODUTO,
+                        DS_INDICADOR,
+                        DS_UNIDADE_NEGOCIO,
+                        NO_CURTO_TERRITORIO,
+                        TS_ATUALIZACAO'''
 
     comando_sql_2 = """select * from TBL_CDO_APOIO_TENDENCIA_VL_VLL"""
     try:
@@ -299,7 +299,7 @@ def montaExcelTendVlVll():
             values='QTD',
             index=['FILIAL'],
             columns=['DS_INDICADOR', 'DS_PRODUTO'],
-            aggfunc=sum,
+            aggfunc='sum',
             fill_value=0,
             margins=True,
             margins_name='TOTAL',
@@ -309,7 +309,7 @@ def montaExcelTendVlVll():
             values='QTD_FINAL',
             index=['DS_INDICADOR', 'DS_PRODUTO', 'GESTAO'],
             columns=['DATA'],
-            aggfunc=sum,
+            aggfunc='sum',
             fill_value=0,
             margins=True,
             margins_name='TOTAL',
@@ -348,7 +348,6 @@ def montaExcelTendVlVll():
 def filtra_df(
     base, indicador, PRODUTO=None, UNIDADE_NEGOCIO=None, GESTAO=None
 ):
-    print('filtra_df')
 
     df_filtrada = base.query(f'DS_INDICADOR == "{indicador}"')
 
