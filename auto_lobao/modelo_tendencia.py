@@ -280,7 +280,7 @@ def puxa_dados_para_simular():
 
 
 def montaExcelTendVlVll():
-    comando_sql = f'''select DS_PRODUTO,
+    comando_sql = f"""select DS_PRODUTO,
                             DS_INDICADOR,
                             DS_UNIDADE_NEGOCIO,
                             NO_CURTO_TERRITORIO as FILIAL,
@@ -292,7 +292,7 @@ def montaExcelTendVlVll():
                         DS_INDICADOR,
                         DS_UNIDADE_NEGOCIO,
                         NO_CURTO_TERRITORIO,
-                        TS_ATUALIZACAO'''
+                        TS_ATUALIZACAO"""
 
     comando_sql_2 = """select * from TBL_CDO_APOIO_TENDENCIA_VL_VLL"""
     try:
@@ -320,20 +320,20 @@ def montaExcelTendVlVll():
             margins=True,
             margins_name='TOTAL',
         )
-        
+
         dir_insumo_tend = config['DEFAULT']['dir_rede_insumo_tend']
         dest_filename = f'Tend_VL_VLL_Fibra_NovaFibra_{AAAAMMDD}.xlsx'
         full_dest_path = os.path.join(dir_insumo_tend, dest_filename)
-        
+
         if os.path.exists(full_dest_path):
             # Se o arquivo já existe, determine o próximo número sequencial
             base, ext = os.path.splitext(full_dest_path)
             version = 1
-            while os.path.exists(f"{base}-v{version}{ext}"):
+            while os.path.exists(f'{base}-v{version}{ext}'):
                 version += 1
-            new_dest_path = f"{base}-v{version}{ext}"
+            new_dest_path = f'{base}-v{version}{ext}'
             os.rename(full_dest_path, new_dest_path)
-        
+
         with pd.ExcelWriter(full_dest_path) as writer:
             df.to_excel(
                 writer, sheet_name='DADOS', startcol=0, startrow=0, index=0
