@@ -56,7 +56,7 @@ def roda_modelo_tendencia():
 
 def roda_verifica_duplicidade_bov():
     caminho = config['DEFAULT']['base_bov_check_dup']
-    
+
     arquivos_colunas = [
         (f'BOV_1059_{AAAAMMDD}.TXT.zip', 'BOV_1059.TXT', 'NUMERO_PEDIDO'),
         (f'BOV_1065_{AAAAMMDD}.TXT.zip', 'BOV_1065.TXT', 'NUMERO_PEDIDO'),
@@ -65,7 +65,7 @@ def roda_verifica_duplicidade_bov():
     ]
 
     for arquivo_zip, arquivo, coluna in arquivos_colunas:
-        verifica_duplicidade_bov(fr'{caminho}{arquivo_zip}', arquivo, coluna)
+        verifica_duplicidade_bov(rf'{caminho}{arquivo_zip}', arquivo, coluna)
 
 
 def enviar_email_tend_vl_vll_para_operacoes():
@@ -219,7 +219,9 @@ def main():
             a = input('Tecle qualquer tecla para continuar...')
 
         elif opcaoSelecionada == '10':
-            print('opção 10 selecionada...(Criar Arquivo de Ofertas vs DE-PARA)')
+            print(
+                'opção 10 selecionada...(Criar Arquivo de Ofertas vs DE-PARA)'
+            )
             criar_arquivo_ofertas_vs_depara_ticket()
             a = input('Tecle qualquer tecla para continuar...')
 
