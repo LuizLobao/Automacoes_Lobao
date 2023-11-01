@@ -228,7 +228,7 @@ def main():
             a = input('Tecle qualquer tecla para continuar...')
 
         elif opcaoSelecionada == '12':
-            print('opção 13 selecionada...(Envia Lista de PDV Outros)')
+            print('opção 12 selecionada...(Envia Lista de PDV Outros)')
             enviar_lista_pdv_outros()
             a = input('Tecle qualquer tecla para continuar...')
 
