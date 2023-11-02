@@ -1,12 +1,25 @@
 import configparser
+import logging
 import pandas as pd
 import pypyodbc as odbc
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 import urllib
+import os
+from datetime import datetime, timedelta
 
 
-from funcoes import executar_sql
+AAAAMMDD = (datetime.today()).strftime('%Y%m%d')
+
+
+user_id = os.getlogin()
+FORMAT = f'%(asctime)s | %(levelname)s | %(filename)s | User: {user_id} | %(message)s'
+logging.basicConfig(
+    level=logging.INFO, filename='logs/auto_lobao.log', format=FORMAT
+)
+
+
+from funcoes import executar_sql, criar_arquivo_zip
 
 
 def carregar_dados_excel_para_csv(config):
@@ -50,6 +63,7 @@ def carregar_dados_excel_para_csv(config):
         decimal=',',
         mode='w',
     )
+    logging.info(f'Arquivo de meta criado em CSV: meta_diaria_{anomes_df}.csv')
     return meta_diaria_df
 
 
@@ -74,6 +88,7 @@ def carregar_dados_para_banco_de_dados(meta_diaria_df, config):
     )
     engine = create_engine(connection_url, module=odbc)
 
+    logging.info(f'Iniciando carga de Meta em : TBL_PC_META_DIARIA_VL_VLL')
     meta_diaria_df.to_sql(
         'TBL_PC_META_DIARIA_VL_VLL',
         engine,
@@ -81,13 +96,25 @@ def carregar_dados_para_banco_de_dados(meta_diaria_df, config):
         index=False,
         schema='dbo',
     )
+    logging.info(f'Fim da carga de Meta em : TBL_PC_META_DIARIA_VL_VLL')
 
 
 def main():
     config = configparser.ConfigParser()
     config.read('auto_lobao/config.ini', encoding='utf-8')
 
+    diretorio = config['DEFAULT']['dir_rede_metas']
+    arquivo = config['DEFAULT']['arquivo_meta_diaria']
+    caminho = diretorio + arquivo
+    base, ext = os.path.splitext(arquivo)
+    caminhozip = diretorio+f'{base}-{AAAAMMDD}.zip'
+
     meta_diaria_df = carregar_dados_excel_para_csv(config)
+    
+    criar_arquivo_zip(caminho, caminhozip)
+    # Excluir o arquivo de origem após criar o ZIP
+    os.remove(caminho)
+
     carregar_dados_para_banco_de_dados(meta_diaria_df, config)
 
 
