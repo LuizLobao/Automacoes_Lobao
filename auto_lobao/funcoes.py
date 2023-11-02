@@ -9,11 +9,23 @@ import win32com.client as win32
 
 import segredos
 
+
+
 user_id = os.getlogin()
 FORMAT = f'%(asctime)s | %(levelname)s | %(filename)s | User: {user_id} | %(message)s'
 logging.basicConfig(
     level=logging.INFO, filename='logs/auto_lobao.log', format=FORMAT
 )
+
+
+def criar_arquivo_zip(arquivo_origem, arquivo_destino):
+    try:
+        with zipfile.ZipFile(arquivo_destino, 'w', zipfile.ZIP_DEFLATED) as zf:
+            # Adicione o arquivo de origem ao arquivo ZIP
+            zf.write(arquivo_origem, arcname=arquivo_origem)
+            logging.info(f'Arquivo ZIP criado com sucesso: {arquivo_destino}.')
+    except Exception as e:
+        logging.error(f'Erro ao criar o arquivo ZIP: {e}')
 
 
 def criar_conexao():
