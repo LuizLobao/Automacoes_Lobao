@@ -1,30 +1,95 @@
 import configparser
 import pandas as pd
+import pypyodbc as odbc
+from sqlalchemy import create_engine
+from sqlalchemy.engine import URL
+import urllib
 
-config = configparser.ConfigParser()
-config.read('auto_lobao/config.ini', encoding='utf-8')
+
+from funcoes import executar_sql
 
 
-def prepara_meta_diaria():
+def carregar_dados_excel_para_csv(config):
     diretorio = config['DEFAULT']['dir_rede_metas']
     arquivo = config['DEFAULT']['arquivo_meta_diaria']
-    caminho = diretorio+arquivo
-    
-    df = pd.read_excel(caminho, sheet_name=0, header=0)
-    df = df.drop(columns='TOTAL')
-    
-    # Usando a função melt para transpor as colunas D01, D02, D03, D04 em uma coluna "DIA"
-    df = pd.melt(df, id_vars=['ORIGEM', 'TIPO', 'SEGMENTO', 'GESTAO', 'FILIAL','MUNICIPIO', 'INDICADOR','ANOMES'], var_name='DIA', value_name='VALOR')
+    caminho = diretorio + arquivo
+
+    meta_diaria_df = pd.read_excel(caminho, sheet_name=0, header=0)
+    meta_diaria_df = meta_diaria_df.drop(columns='TOTAL')
+
+    # Realize as transformações nos dados, como a transposição e substituições
+    meta_diaria_df = pd.melt(
+        meta_diaria_df,
+        id_vars=[
+            'ORIGEM',
+            'TIPO',
+            'SEGMENTO',
+            'GESTAO',
+            'FILIAL',
+            'MUNICIPIO',
+            'INDICADOR',
+            'ANOMES',
+        ],
+        var_name='DIA',
+        value_name='VALOR',
+    )
     # Usando o replace para arrumar as informações de cada coluna
-    df['SEGMENTO'] = df['SEGMENTO'].replace('VA', 'VAREJO')
-    df['SEGMENTO'] = df['SEGMENTO'].replace('EM', 'EMPRESARIAL')
-    df['GESTAO'] = df['GESTAO'].replace('Canais de Base','OUTROS')
-    df['GESTAO'] = df['GESTAO'].replace('TELEAGENTES TLV NACIONAL','TLV PP')
-    df['DIA'] = df['DIA'].str.replace('D0', '')
-    df['DIA'] = df['DIA'].str.replace('D', '')
-    print(df)
+    meta_diaria_df['SEGMENTO'] = meta_diaria_df['SEGMENTO'].replace('VA', 'VAREJO')
+    meta_diaria_df['SEGMENTO'] = meta_diaria_df['SEGMENTO'].replace('EM', 'EMPRESARIAL')
+    meta_diaria_df['GESTAO'] = meta_diaria_df['GESTAO'].replace('Canais de Base', 'OUTROS')
+    meta_diaria_df['GESTAO'] = meta_diaria_df['GESTAO'].replace('TELEAGENTES TLV NACIONAL', 'TLV PP')
+    meta_diaria_df['DIA'] = meta_diaria_df['DIA'].str.replace('D0', '')
+    meta_diaria_df['DIA'] = meta_diaria_df['DIA'].str.replace('D', '')
+    anomes_df = meta_diaria_df['ANOMES'].iloc[0]
 
-    df.to_csv(diretorio+'meta_diaria.csv', sep=';',header=True, index=False, decimal=','  , mode='w')
-    
+    meta_diaria_df.to_csv(
+        diretorio + f'meta_diaria_{anomes_df}.csv',
+        sep=';',
+        header=True,
+        index=False,
+        decimal=',',
+        mode='w',
+    )
+    return meta_diaria_df
 
-prepara_meta_diaria()
+
+def carregar_dados_para_banco_de_dados(meta_diaria_df, config):
+    anomes_df = meta_diaria_df['ANOMES'].iloc[0]
+
+    comando_sql = (
+        f'delete from dbo.TBL_PC_META_DIARIA_VL_VLL where anomes = {anomes_df}'
+    )
+    executar_sql(comando_sql)
+
+    SERVER_NAME = r'SQLPW90DB03\DBINST3,1443'
+    DATABASE_NAME = 'BDintelicanais'
+    connection_string = f"""
+    Driver={{ODBC Driver 13 for SQl Server}};
+    Server={SERVER_NAME};
+    Database={DATABASE_NAME};
+    Trusted_Connection=yes;
+    """
+    connection_url = URL.create(
+        'mssql+pyodbc', query={'odbc_connect': connection_string}
+    )
+    engine = create_engine(connection_url, module=odbc)
+
+    meta_diaria_df.to_sql(
+        'TBL_PC_META_DIARIA_VL_VLL',
+        engine,
+        if_exists='append',
+        index=False,
+        schema='dbo',
+    )
+
+
+def main():
+    config = configparser.ConfigParser()
+    config.read('auto_lobao/config.ini', encoding='utf-8')
+
+    meta_diaria_df = carregar_dados_excel_para_csv(config)
+    carregar_dados_para_banco_de_dados(meta_diaria_df, config)
+
+
+if __name__ == '__main__':
+    main()
