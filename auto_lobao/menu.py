@@ -26,20 +26,20 @@ def menu():
     print(
         '--------------- Atividades Cargas de Metas/Orçamento ----------------'
     )
-    print('')
-    print('')
+    print('11) Carga Meta Diaria (CDO) ')
+    print('12) Carga Meta POVE (CDO)')
     print('')
     print(
         '--------------- Atividades Relacionadas a PDVs/Carteira -------------'
     )
-    print('12) Envia Lista de PDV Outros')
+    print('15) Envia Lista de PDV Outros')
     print('')
     print('')
     print('')
     print(
         '---------------------------------------------------------------------'
     )
-    print('13) Sair')
+    print('20) Sair')
     print(
         '-------------------------------------------------------------------'
     )
