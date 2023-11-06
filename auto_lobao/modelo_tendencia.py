@@ -1,16 +1,14 @@
-import os
 import configparser
+import os
 from datetime import datetime, timedelta
 
 import pandas as pd
 import statsmodels.api as sm
 import win32com.client as win32
 from dateutil.relativedelta import relativedelta
+from funcoes import *
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from statsmodels.tsa.seasonal import seasonal_decompose
-
-from funcoes import *
-
 
 config = configparser.ConfigParser()
 config.read('auto_lobao/config.ini', encoding='utf-8')

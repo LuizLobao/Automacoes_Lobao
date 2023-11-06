@@ -25,6 +25,7 @@ O projeto ainda está em desenvolvimento e as próximas atualizações serão vo
 💰Receita Contratada:
 - [x] Execução de procedure para revisão/ajuste de ticket para Receita Contratada
 - [x] Gerar tabelas Ofertas vs De-Para Ticket
+- [ ] Cadastro de Ofertas no De-Para
 
 🏪Ajustes de PDV:
 - [ ] Montar tabela de PDVs classificados como OUTROS para equipe responsável
@@ -57,9 +58,9 @@ Windows:
 <comando_de_instalação>
 ```
 
-## ☕ Usando <nome_do_projeto>
+## ☕ Usando <Auto Lobão>
 
-Para usar <nome_do_projeto>, siga estas etapas:
+Para usar <Auto Lobão>, siga estas etapas:
 
 ```
 <exemplo_de_uso>
@@ -67,9 +68,9 @@ Para usar <nome_do_projeto>, siga estas etapas:
 
 Adicione comandos de execução e exemplos que você acha que os usuários acharão úteis. Fornece uma referência de opções para pontos de bônus!
 
-## 📫 Contribuindo para <nome_do_projeto>
+## 📫 Contribuindo para <Auto Lobão>
 
-Para contribuir com <nome_do_projeto>, siga estas etapas:
+Para contribuir com <Auto Lobão>, siga estas etapas:
 
 1. Bifurque este repositório.
 2. Crie um branch: `git checkout -b <nome_branch>`.
