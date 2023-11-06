@@ -26,7 +26,7 @@ def menu():
     print(
         '--------------- Atividades Cargas de Metas/Orçamento ----------------'
     )
-    print('')
+    print('11) Carregar Meta Diária')
     print('')
     print('')
     print(

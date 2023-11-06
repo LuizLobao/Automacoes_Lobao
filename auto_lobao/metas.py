@@ -1,13 +1,14 @@
 import configparser
 import logging
+import os
+import urllib
+from datetime import datetime
+
 import pandas as pd
 import pypyodbc as odbc
+from funcoes import criar_arquivo_zip, executar_sql
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
-import urllib
-import os
-from datetime import datetime, timedelta
-
 
 AAAAMMDD = (datetime.today()).strftime('%Y%m%d')
 
@@ -19,10 +20,10 @@ logging.basicConfig(
 )
 
 
-from funcoes import executar_sql, criar_arquivo_zip
 
 
-def carregar_dados_excel_para_csv(config):
+
+def carregar_metadiaria_excel_para_csv(config):
     diretorio = config['DEFAULT']['dir_rede_metas']
     arquivo = config['DEFAULT']['arquivo_meta_diaria']
     caminho = diretorio + arquivo
@@ -47,10 +48,20 @@ def carregar_dados_excel_para_csv(config):
         value_name='VALOR',
     )
     # Usando o replace para arrumar as informações de cada coluna
-    meta_diaria_df['SEGMENTO'] = meta_diaria_df['SEGMENTO'].replace('VA', 'VAREJO')
-    meta_diaria_df['SEGMENTO'] = meta_diaria_df['SEGMENTO'].replace('EM', 'EMPRESARIAL')
-    meta_diaria_df['GESTAO'] = meta_diaria_df['GESTAO'].replace('Canais de Base', 'OUTROS')
-    meta_diaria_df['GESTAO'] = meta_diaria_df['GESTAO'].replace('TELEAGENTES TLV NACIONAL', 'TLV PP')
+    
+    mapeamento = {
+    'SEGMENTO': {'VA': 'VAREJO', 
+                 'EM': 'EMPRESARIAL'},
+    'GESTAO': {'Canais de Base': 'OUTROS', 
+               'TELEAGENTES TLV NACIONAL': 'TLV PP'}
+    }
+    for coluna, substituicoes in mapeamento.items():
+        meta_diaria_df[coluna] = meta_diaria_df[coluna].replace(substituicoes)
+
+    #meta_diaria_df['SEGMENTO'] = meta_diaria_df['SEGMENTO'].replace('VA', 'VAREJO')
+    #meta_diaria_df['SEGMENTO'] = meta_diaria_df['SEGMENTO'].replace('EM', 'EMPRESARIAL')
+    #meta_diaria_df['GESTAO'] = meta_diaria_df['GESTAO'].replace('Canais de Base', 'OUTROS')
+    #meta_diaria_df['GESTAO'] = meta_diaria_df['GESTAO'].replace('TELEAGENTES TLV NACIONAL', 'TLV PP')
     meta_diaria_df['DIA'] = meta_diaria_df['DIA'].str.replace('D0', '')
     meta_diaria_df['DIA'] = meta_diaria_df['DIA'].str.replace('D', '')
     anomes_df = meta_diaria_df['ANOMES'].iloc[0]
@@ -67,7 +78,7 @@ def carregar_dados_excel_para_csv(config):
     return meta_diaria_df
 
 
-def carregar_dados_para_banco_de_dados(meta_diaria_df, config):
+def carregar_metadiaria_para_banco_de_dados(meta_diaria_df, config):
     anomes_df = meta_diaria_df['ANOMES'].iloc[0]
 
     comando_sql = (
@@ -99,24 +110,24 @@ def carregar_dados_para_banco_de_dados(meta_diaria_df, config):
     logging.info(f'Fim da carga de Meta em : TBL_PC_META_DIARIA_VL_VLL')
 
 
-def main():
-    config = configparser.ConfigParser()
-    config.read('auto_lobao/config.ini', encoding='utf-8')
+#def main():
+#    config = configparser.ConfigParser()
+#    config.read('auto_lobao/config.ini', encoding='utf-8')
+#
+#    diretorio = config['DEFAULT']['dir_rede_metas']
+#    arquivo = config['DEFAULT']['arquivo_meta_diaria']
+#    caminho = diretorio + arquivo
+#    base, ext = os.path.splitext(arquivo)
+#    caminhozip = diretorio+f'{base}-{AAAAMMDD}.zip'
+#
+#    meta_diaria_df = carregar_dados_excel_para_csv(config)
+#    
+#    criar_arquivo_zip(caminho, caminhozip)
+#    # Excluir o arquivo de origem após criar o ZIP
+#    os.remove(caminho)
+#
+#    carregar_dados_para_banco_de_dados(meta_diaria_df, config)
 
-    diretorio = config['DEFAULT']['dir_rede_metas']
-    arquivo = config['DEFAULT']['arquivo_meta_diaria']
-    caminho = diretorio + arquivo
-    base, ext = os.path.splitext(arquivo)
-    caminhozip = diretorio+f'{base}-{AAAAMMDD}.zip'
 
-    meta_diaria_df = carregar_dados_excel_para_csv(config)
-    
-    criar_arquivo_zip(caminho, caminhozip)
-    # Excluir o arquivo de origem após criar o ZIP
-    os.remove(caminho)
-
-    carregar_dados_para_banco_de_dados(meta_diaria_df, config)
-
-
-if __name__ == '__main__':
-    main()
+#if __name__ == '__main__':
+#    main()
