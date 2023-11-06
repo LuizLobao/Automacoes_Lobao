@@ -19,6 +19,7 @@ config.read('auto_lobao/config.ini', encoding='utf-8')
 data_referencia = datetime.today() - timedelta(days=1)
 AAAAMMDD_referencia = (datetime.today() - timedelta(days=0)).strftime('%Y%m%d')
 AAAAMM = (datetime.today()).strftime('%Y%m')
+AAAAMM_ant = (datetime.today()- relativedelta(months=1)).strftime('%Y%m')
 AAAAMMDD = (datetime.today()).strftime('%Y%m%d')
 ultimo_dia_do_mes = (
     data_referencia.replace(day=1) + timedelta(days=32)
@@ -52,7 +53,7 @@ def puxa_deflac_ref():
 						left join [dbo].[TBL_CDO_DE_PARA_CANAL] as B on A.DS_CANAL_BOV = b.[DS_DESCRICAO_CANAL_BOV]
 						LEFT JOIN [dbo].[TBL_CDO_DE_PARA_REGIONAL] AS c ON A.NO_CURTO_TERRITORIO = C.NO_CURTO_TERRITORIO
 					where [DS_DET_INDICADOR] in ('NOVOS CLIENTES','MIG AQUISICAO')
-						and [dt_anomes] in ( '202308' )
+						and [dt_anomes] in ( {AAAAMM_ant} )
 						and DS_INDICADOR IN ('VL','VLL')
 					group by  
 						--a.[dt_anomes]
