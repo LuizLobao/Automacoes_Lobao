@@ -5,11 +5,8 @@ import zipfile
 
 import pandas as pd
 import pyodbc
-import win32com.client as win32
-
 import segredos
-
-
+import win32com.client as win32
 
 user_id = os.getlogin()
 FORMAT = f'%(asctime)s | %(levelname)s | %(filename)s | User: {user_id} | %(message)s'

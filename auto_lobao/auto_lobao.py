@@ -8,6 +8,7 @@ from funcoes import *
 from metas import *
 from menu import *
 from modelo_tendencia import *
+from metas import  *
 
 config = configparser.ConfigParser()
 config.read('auto_lobao/config.ini', encoding='utf-8')
@@ -33,6 +34,25 @@ ultimo_dia_do_mes = (
 dias_faltando = (ultimo_dia_do_mes - data_referencia).days
 hoje = (datetime.today() - timedelta(days=0)).strftime('%d/%m/%Y')
 AAAAMMDD = (datetime.today()).strftime('%Y%m%d')
+
+
+def carregar_metas_diaria():
+
+    diretorio = config['DEFAULT']['dir_rede_metas']
+    arquivo = config['DEFAULT']['arquivo_meta_diaria']
+    caminho = diretorio + arquivo
+    base, ext = os.path.splitext(arquivo)
+    caminhozip = diretorio+f'{base}-{AAAAMMDD}.zip'
+
+    meta_diaria_df = carregar_metadiaria_excel_para_csv(config)
+    
+    criar_arquivo_zip(caminho, caminhozip)
+    # Excluir o arquivo de origem após criar o ZIP
+    os.remove(caminho)
+
+    carregar_metadiaria_para_banco_de_dados(meta_diaria_df, config)
+
+
 
 
 def roda_modelo_tendencia():

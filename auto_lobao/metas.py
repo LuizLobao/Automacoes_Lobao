@@ -1,14 +1,15 @@
 import configparser
 import logging
+import os
+import urllib
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
 import pypyodbc as odbc
+from funcoes import criar_arquivo_zip, executar_sql
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
-import urllib
-import os
-from datetime import datetime, timedelta
-
 
 AAAAMMDD = (datetime.today()).strftime('%Y%m%d')
 AAAAMM = (datetime.today()).strftime('%Y%m')
@@ -175,10 +176,13 @@ def carregar_metapove_para_banco_de_dados(meta_pove_df, config):
     )
     logging.info(f'Fim da carga de Meta em : TBL_CDO_FISICOS_METAS')
 
-def carregar_dados_para_banco_de_dados(meta_diaria_df, config):
+
+def carregar_metadiaria_para_banco_de_dados(meta_diaria_df, config):
     anomes_df = meta_diaria_df['ANOMES'].iloc[0]
 
-    comando_sql = (f'delete from dbo.TBL_PC_META_DIARIA_VL_VLL where anomes = {anomes_df}')
+    comando_sql = (
+        f'delete from dbo.TBL_PC_META_DIARIA_VL_VLL where anomes = {anomes_df}'
+    )
     executar_sql(comando_sql)
 
     SERVER_NAME = r'SQLPW90DB03\DBINST3,1443'
