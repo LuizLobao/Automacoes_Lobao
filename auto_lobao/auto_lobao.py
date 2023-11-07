@@ -53,8 +53,6 @@ def carregar_metas_diaria():
     carregar_metadiaria_para_banco_de_dados(meta_diaria_df, config)
 
 
-
-
 def roda_modelo_tendencia():
     puxa_deflac_ref()
     df_real = puxa_dados_real()
