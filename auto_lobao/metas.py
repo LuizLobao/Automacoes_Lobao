@@ -11,6 +11,10 @@ from funcoes import criar_arquivo_zip, executar_sql
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 
+from funcoes import executar_sql, criar_arquivo_zip
+
+pd.options.mode.chained_assignment = None  # default='warn'
+
 AAAAMMDD = (datetime.today()).strftime('%Y%m%d')
 AAAAMM = (datetime.today()).strftime('%Y%m')
 AAAAMMv = int((datetime.today()).strftime('%Y%m'))
@@ -22,9 +26,6 @@ FORMAT = f'%(asctime)s | %(levelname)s | %(filename)s | User: {user_id} | %(mess
 logging.basicConfig(
     level=logging.INFO, filename='logs/auto_lobao.log', format=FORMAT
 )
-
-
-from funcoes import executar_sql, criar_arquivo_zip
 
 
 def meta_pove_para_csv(config):
@@ -43,8 +44,51 @@ def meta_pove_para_csv(config):
     meta_pove_df['Gestão'] = meta_pove_df['Gestão'].replace('TELEAGENTES TLV NACIONAL', 'TLV PP')
     meta_pove_df['Canal'] = meta_pove_df['Canal'].replace('Canais de Base', 'OUTROS')
     
-    meta_pove_df = meta_pove_df.loc[meta_pove_df['Produto'] == 'BANDA LARGA']
+    lista_produto = ['BANDA LARGA','FIXO FIBRA','OI TV FIBRA']
+    meta_pove_df = meta_pove_df[meta_pove_df['Produto'].isin(lista_produto)]
+    #meta_pove_df = meta_pove_df.loc[meta_pove_df['Produto'] == 'BANDA LARGA']
     meta_pove_df = meta_pove_df.loc[meta_pove_df['Anomes'] == AAAAMMv]
+
+    #cria df só com banda larga para depois transformar na GPON
+    meta_pove_gpon = meta_pove_df.loc[meta_pove_df['Produto'] == 'BANDA LARGA']
+
+    meta_pove_gpon['Produto'] = np.where((meta_pove_gpon['GRUPO_PLANO'] == 'FIBRA') & 
+                                       (meta_pove_gpon['Produto'] == 'BANDA LARGA'), 
+                                       'FIBRA', meta_pove_gpon['Produto'])
+    
+    meta_pove_gpon['Produto'] = np.where((meta_pove_gpon['GRUPO_PLANO'] == 'NOVA FIBRA') & 
+                                       (meta_pove_gpon['Produto'] == 'BANDA LARGA'), 
+                                       'NOVA FIBRA', meta_pove_gpon['Produto'])
+
+
+
+    meta_pove_df['Produto'] = np.where((meta_pove_df['GRUPO_PLANO'] == 'FIBRA') & 
+                                       (meta_pove_df['Produto'] == 'FIXO FIBRA'), 
+                                       'FIXO FIBRA', meta_pove_df['Produto'])
+    
+    meta_pove_df['Produto'] = np.where((meta_pove_df['GRUPO_PLANO'] == 'NOVA FIBRA') & 
+                                       (meta_pove_df['Produto'] == 'FIXO FIBRA'), 
+                                       'FIXO NOVA FIBRA', meta_pove_df['Produto'])
+
+    meta_pove_df['Produto'] = np.where((meta_pove_df['GRUPO_PLANO'] == 'FIBRA') & 
+                                       (meta_pove_df['Produto'] == 'BANDA LARGA'), 
+                                       'BANDA LARGA FIBRA', meta_pove_df['Produto'])
+    
+    meta_pove_df['Produto'] = np.where((meta_pove_df['GRUPO_PLANO'] == 'NOVA FIBRA') & 
+                                       (meta_pove_df['Produto'] == 'BANDA LARGA'), 
+                                       'BANDA LARGA NOVA FIBRA', meta_pove_df['Produto'])
+    
+    meta_pove_df['Produto'] = np.where((meta_pove_df['GRUPO_PLANO'] == 'FIBRA') & 
+                                       (meta_pove_df['Produto'] == 'OI TV FIBRA'), 
+                                       'OI TV FIBRA', meta_pove_df['Produto'])
+    
+    meta_pove_df['Produto'] = np.where((meta_pove_df['GRUPO_PLANO'] == 'NOVA FIBRA') & 
+                                       (meta_pove_df['Produto'] == 'OI TV FIBRA'), 
+                                       'OI TV NOVA FIBRA', meta_pove_df['Produto'])
+    
+
+    meta_pove_df = pd.concat([meta_pove_df, meta_pove_gpon], ignore_index=True)
+
 
     meta_pove_df['DT_REFERENCIA'] = f'01/{MM_AAAA}'
     meta_pove_df['DS_UGR'] = 'HC'
@@ -77,7 +121,7 @@ def meta_pove_para_csv(config):
                                  'Meta':'QTD',
                                  'Anomes':'DT_ANOMES'})
     
-    meta_pove_df = meta_pove_df[['DS_TIPO','DS_PRODUTO','DS_UGR','DS_GRUPO_INDICADOR'
+    meta_pove_df = meta_pove_df[['DS_TIPO','DS_PRODUTO','Produto','DS_UGR','DS_GRUPO_INDICADOR'
                                 ,'DS_INDICADOR','DS_DET_INDICADOR','DT_REFERENCIA','CD_ACESSO_GPON'
                                 ,'CD_CONTA_FATURA','CD_IDENT_PESSOA','DS_UNIDADE_NEGOCIO','DS_TP_POSSE'
                                 ,'NO_CURTO_TERRITORIO','NO_MUNICIPIO','nu_localidade','DS_CAMPANHA'
@@ -148,11 +192,26 @@ def carregar_dados_excel_para_csv(config):
 def carregar_metapove_para_banco_de_dados(meta_pove_df, config):
     anomes_df = meta_pove_df['DT_ANOMES'].iloc[0]
 
+    lista_produto = ['BANDA LARGA FIBRA','BANDA LARGA NOVA FIBRA']
+    meta_pove_df = meta_pove_df[meta_pove_df['Produto'].isin(lista_produto)]
+
+    meta_pove_df.drop('Produto', inplace=True, axis=1)
+
+    diretorio = config['DEFAULT']['dir_rede_metas']
+    meta_pove_df.to_csv(
+        diretorio + f'meta_pove_teste_{anomes_df}.csv',
+        sep=';',
+        header=True,
+        index=False,
+        decimal=',',
+        mode='w',
+    )
+    
+
     comando_sql = (
         f"delete from dbo.TBL_CDO_FISICOS_METAS where DT_ANOMES = {AAAAMM} and DS_TIPO = 'META' "
     )
     executar_sql(comando_sql)
-
     SERVER_NAME = r'SQLPW90DB03\DBINST3,1443'
     DATABASE_NAME = 'BDintelicanais'
     connection_string = f"""
@@ -165,7 +224,6 @@ def carregar_metapove_para_banco_de_dados(meta_pove_df, config):
         'mssql+pyodbc', query={'odbc_connect': connection_string}
     )
     engine = create_engine(connection_url, module=odbc)
-
     logging.info(f'Iniciando carga de Meta em : TBL_CDO_FISICOS_METAS')
     meta_pove_df.to_sql(
         'TBL_CDO_FISICOS_METAS',
@@ -209,13 +267,13 @@ def carregar_metadiaria_para_banco_de_dados(meta_diaria_df, config):
     logging.info(f'Fim da carga de Meta em : TBL_PC_META_DIARIA_VL_VLL')
 
 
-#def main():
-    #config = configparser.ConfigParser()
-    #config.read('auto_lobao/config.ini', encoding='utf-8')
+def main():
+    config = configparser.ConfigParser()
+    config.read('auto_lobao/config.ini', encoding='utf-8')
 #
-    #diretorio = config['DEFAULT']['dir_rede_metas']
+    diretorio = config['DEFAULT']['dir_rede_metas']
     #arquivo = config['DEFAULT']['arquivo_meta_diaria']
-    #arquivopove = config['DEFAULT']['arquivo_meta_pove']
+    arquivopove = config['DEFAULT']['arquivo_meta_pove']
 #
     #caminho = diretorio + arquivo
     #base, ext = os.path.splitext(arquivo)
@@ -226,13 +284,13 @@ def carregar_metadiaria_para_banco_de_dados(meta_diaria_df, config):
     #carregar_dados_para_banco_de_dados(meta_diaria_df, config)
 #
 #
-    #caminho_pove = diretorio + arquivopove
-    #basepove, ext = os.path.splitext(arquivopove)
-    #caminhopovezip = diretorio+f'{basepove}-{AAAAMMDD}.zip'
-    #meta_pove_df = meta_pove_para_csv(config)
+    caminho_pove = diretorio + arquivopove
+    basepove, ext = os.path.splitext(arquivopove)
+    caminhopovezip = diretorio+f'{basepove}-{AAAAMMDD}.zip'
+    meta_pove_df = meta_pove_para_csv(config)
     #criar_arquivo_zip(caminho_pove, caminhopovezip)
     #os.remove(caminho_pove)
-    #carregar_metapove_para_banco_de_dados(meta_pove_df, config)
+    carregar_metapove_para_banco_de_dados(meta_pove_df, config)
 
-#if __name__ == '__main__':
-#    main()
+if __name__ == '__main__':
+    main()
