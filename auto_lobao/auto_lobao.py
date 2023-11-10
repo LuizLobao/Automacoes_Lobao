@@ -35,24 +35,6 @@ dias_faltando = (ultimo_dia_do_mes - data_referencia).days
 hoje = (datetime.today() - timedelta(days=0)).strftime('%d/%m/%Y')
 AAAAMMDD = (datetime.today()).strftime('%Y%m%d')
 
-
-def carregar_metas_diaria():
-
-    diretorio = config['DEFAULT']['dir_rede_metas']
-    arquivo = config['DEFAULT']['arquivo_meta_diaria']
-    caminho = diretorio + arquivo
-    base, ext = os.path.splitext(arquivo)
-    caminhozip = diretorio+f'{base}-{AAAAMMDD}.zip'
-
-    meta_diaria_df = carregar_metadiaria_excel_para_csv(config)
-    
-    criar_arquivo_zip(caminho, caminhozip)
-    # Excluir o arquivo de origem após criar o ZIP
-    os.remove(caminho)
-
-    carregar_metadiaria_para_banco_de_dados(meta_diaria_df, config)
-
-
 def roda_modelo_tendencia():
     puxa_deflac_ref()
     df_real = puxa_dados_real()
@@ -185,34 +167,51 @@ def criar_arquivo_ofertas_vs_depara_ticket():
 
 
 def carga_meta_diaria():
+    '''
+    Processos para preparar o arquivo de meta diaria, gerar um csv tratado, carregar no banco de dados
+    Depois de carregar, rodar procedure para enviar a meta para a tabela CDO METAS
+    Compactar o arquivo e deletar o original
+    '''
     config = configparser.ConfigParser()
     config.read('auto_lobao/config.ini', encoding='utf-8')
-
     diretorio = config['DEFAULT']['dir_rede_metas']
     arquivo = config['DEFAULT']['arquivo_meta_diaria']
 
     caminho = diretorio + arquivo
     base, ext = os.path.splitext(arquivo)
     caminhozip = diretorio+f'{base}-{AAAAMMDD}.zip'
-    meta_diaria_df = carregar_dados_excel_para_csv(config)
+
+    df_meta_diaria = prepara_meta_diaria(config)
+    anomes_df = df_meta_diaria['ANOMES'].iloc[0]
+
+    meta_diaria_para_csv(config, df_meta_diaria)
+    carregar_metadiaria_para_banco_de_dados(df_meta_diaria)
+    executa_procedure_sql('SP_CDO_META_DIARIA_CDO', anomes_df)
+    
     criar_arquivo_zip(caminho, caminhozip)
-    carregar_dados_para_banco_de_dados(meta_diaria_df, config)
     os.remove(caminho)
 
 
 def carga_meta_pove():
+    '''
+    Processos para preparar a meta POVE, gerar CSV e carregar no banco de dados
+    Compactar o arquivo e deletar o original
+    Atenção: o arquivo CSV gerado, tem, além dos valores para GPON, os valores por UGR
+    '''
     config = configparser.ConfigParser()
     config.read('auto_lobao/config.ini', encoding='utf-8')
-
     diretorio = config['DEFAULT']['dir_rede_metas']
     arquivopove = config['DEFAULT']['arquivo_meta_pove']
 
     caminho_pove = diretorio + arquivopove
     basepove, ext = os.path.splitext(arquivopove)
     caminhopovezip = diretorio+f'{basepove}-{AAAAMMDD}.zip'
-    meta_pove_df = meta_pove_para_csv(config)
+    
+    dfmetapove = prepara_meta_pove(config)
+    meta_pove_para_csv(config, dfmetapove)
+    carregar_metapove_na_tabela_cdo_metas(config, dfmetapove )
+    
     criar_arquivo_zip(caminho_pove, caminhopovezip)
-    carregar_metapove_para_banco_de_dados(meta_pove_df, config)
     os.remove(caminho_pove)
 
 
