@@ -20,26 +20,26 @@ def menu():
     print(
         '--------------- Atividades Receita Contratada -----------------------'
     )
-    print('9) Procedures Receita Contratada')
-    print('10) Gerar tabelas Ofertas vs De-Para Ticket')
+    print('10) Procedures Receita Contratada')
+    print('11) Gerar tabelas Ofertas vs De-Para Ticket')
     print('')
     print(
         '--------------- Atividades Cargas de Metas/Orçamento ----------------'
     )
-    print('11) Carga Meta Diaria (CDO) ')
-    print('12) Carga Meta POVE (CDO)')
-    print('')
+    print('20) Carga Meta Diaria (CDO) ')
+    print('21) Carga Meta POVE (CDO)')
+    print('22) Carga Meta na tbl_re_baseresultados(_Empresarial) ')
     print(
         '--------------- Atividades Relacionadas a PDVs/Carteira -------------'
     )
-    print('15) Envia Lista de PDV Outros')
+    print('30) Envia Lista de PDV Outros')
     print('')
     print('')
     print('')
     print(
         '---------------------------------------------------------------------'
     )
-    print('20) Sair')
+    print('99) Sair')
     print(
         '-------------------------------------------------------------------'
     )
