@@ -52,7 +52,17 @@ def prepara_meta_pove(config):
     #Filtrar apenas as UGRs que usamos para nossos relatórios
     lista_produto = ['BANDA LARGA','FIXO FIBRA','OI TV FIBRA']
     meta_pove_df = meta_pove_df[meta_pove_df['Produto'].isin(lista_produto)]
-    meta_pove_df = meta_pove_df.loc[meta_pove_df['Anomes'] == AAAAMMv]
+    
+    menordata = meta_pove_df['Anomes'].min()
+    menordatatxt = str(menordata)
+
+    ano = menordatatxt[:4]
+    mes = menordatatxt[4:]
+    
+    print(menordata)
+
+    meta_pove_df = meta_pove_df.loc[meta_pove_df['Anomes'] == menordata]                                 
+    #meta_pove_df = meta_pove_df.loc[meta_pove_df['Anomes'] == AAAAMMv]
 
     #cria df só com banda larga para depois transformar na GPON
     meta_pove_gpon = meta_pove_df.loc[meta_pove_df['Produto'] == 'BANDA LARGA']
@@ -88,7 +98,7 @@ def prepara_meta_pove(config):
     meta_pove_df = pd.concat([meta_pove_df, meta_pove_gpon], ignore_index=True)
 
     #incluir as demais colunas necessárias para subir no banco de dados
-    meta_pove_df['DT_REFERENCIA'] = f'01/{MM_AAAA}'
+    meta_pove_df['DT_REFERENCIA'] = f'01/{mes}/{ano}'
     meta_pove_df['DS_UGR'] = 'HC'
     meta_pove_df['DS_GRUPO_INDICADOR'] = 'FISICOS'
     meta_pove_df['CD_ACESSO_GPON'] = np.nan
@@ -239,7 +249,7 @@ def carregar_metapove_na_tabela_cdo_metas(config, meta_pove_df):
     )
     
     comando_sql = (
-        f"delete from dbo.TBL_CDO_FISICOS_METAS where DT_ANOMES = {AAAAMM} and DS_TIPO = 'META' "
+        f"delete from dbo.TBL_CDO_FISICOS_METAS where DT_ANOMES = {anomes_df} and DS_TIPO = 'META' "
     )
     executar_sql(comando_sql)
 
@@ -263,7 +273,7 @@ def carregar_metapove_na_tabela_cdo_metas(config, meta_pove_df):
         index=False,
         schema='dbo',
     )
-    logging.info(f'Fim da carga de Meta em : TBL_CDO_FISICOS_METAS')
+    logging.info(f'Fim da carga de Meta em : TBL_CDO_FISICOS_METAS ({anomes_df})')
 
 
 def carregar_metadiaria_para_banco_de_dados(meta_diaria_df):
@@ -300,7 +310,7 @@ def carregar_metadiaria_para_banco_de_dados(meta_diaria_df):
         index=False,
         schema='dbo',
     )
-    logging.info(f'Fim da carga de Meta em : TBL_PC_META_DIARIA_VL_VLL')
+    logging.info(f'Fim da carga de Meta em : TBL_PC_META_DIARIA_VL_VLL {anomes_df}')
 
 
 def prepara_meta_tblResultados(config, arquivo_csv):
@@ -308,11 +318,13 @@ def prepara_meta_tblResultados(config, arquivo_csv):
     ATENÇÃO: na tblResultados carregamos a VLL como VL
     '''
     diretorio = config['DEFAULT']['dir_rede_metas']
-    #arquivo_csv = 'meta_pove_202311.csv'
     caminho = diretorio + arquivo_csv
+    logging.info(f'Arquivo MetaPOVE para tblResultados:{caminho}')
 
     df = pd.read_csv(caminho, sep=';',encoding='utf8')
     anomes_df = df['DT_ANOMES'].iloc[0]
+    logging.info(f'Anomes DataFrame MetaPOVE para carga em tblResultados:({anomes_df})')
+    
 
     df = df.drop(columns=['DS_PRODUTO','DS_UGR','DS_GRUPO_INDICADOR','DS_NUMERO_PEDIDO','DS_NUMERO_PEDIDO_ORIG',
                           'VL_OFERTA','CD_ACESSO_GPON','CD_CANAL_SAP','CD_SURVEY','CD_CELULA','DS_VELOCIDADE',
@@ -355,6 +367,12 @@ def prepara_meta_tblResultados(config, arquivo_csv):
     seg = ['VAREJO']
     df = df[df['SEGMENTO'].isin(seg)]
 
+
+    df['INDBD'] = df['INDBD'].replace('Gross', 'GROSS')
+    df['INDBD'] = df['INDBD'].replace('gross', 'GROSS')
+    df['INDBD'] = df['INDBD'].replace('Vll', 'VLL')
+    df['INDBD'] = df['INDBD'].replace('vll', 'VLL')
+
     seg = ['VLL','GROSS']
     df = df[df['INDBD'].isin(seg)]
 
@@ -373,6 +391,7 @@ def prepara_meta_tblResultados(config, arquivo_csv):
     df.loc[df['CANAL_BOV'].str.contains('PAP P', case=False), 'CANAL_BOV'] = 'PAP Próprio'
     df['CANAL_BOV'] = df['CANAL_BOV'].replace('TELEAGENTES TLV NACIONAL', 'TLV PP')
 
+    logging.info(f'Iniciando criação de CSV do arquivo para tbl_resultados:({anomes_df})')
     df.to_csv(diretorio+f'tbl_resultado_{anomes_df}.csv',sep=';',
         header=True,
         index=False,
@@ -390,18 +409,20 @@ def carregar_meta_tblResultados(meta_tblResultados_df):
     Carregar dataframe na tabela de metas.
     '''
     
-    print (meta_tblResultados_df.dtypes)
+    #print (meta_tblResultados_df.dtypes)
 
-    print('tentando converter')
+    #print('tentando converter')
     meta_tblResultados_df['VALOR'] = [x.replace(',', '.') for x in meta_tblResultados_df['VALOR']]
     meta_tblResultados_df['VALOR'] = meta_tblResultados_df['VALOR'].astype(float)
     
-    print (meta_tblResultados_df.dtypes)
+    #print (meta_tblResultados_df.dtypes)
     
     anomes_df = meta_tblResultados_df['DATA'].iloc[0]
+    logging.info(f'Anomes do meta_tblResultados_df:({anomes_df})')
 
+    logging.info(f'Deletando META para data = {anomes_df} em tbl_re_baseresultados')
     comando_sql = (
-        f'delete from dbo.tbl_re_baseresultados where data = {anomes_df}'
+        f"delete from dbo.tbl_re_baseresultados where data = {anomes_df} and TIPO_INDICADOR = 'meta' "
     )
     executar_sql(comando_sql)
 
@@ -430,7 +451,6 @@ def carregar_meta_tblResultados(meta_tblResultados_df):
     logging.info(f'Fim da carga de Meta em : tbl_re_baseresultados')
 
 
-
 def prepara_meta_tblResultadosEmpresarial(config, arquivo_csv):
     '''
     ATENÇÃO: na tblResultadosEmpresarial carregamos a VLL como VL
@@ -438,9 +458,11 @@ def prepara_meta_tblResultadosEmpresarial(config, arquivo_csv):
     diretorio = config['DEFAULT']['dir_rede_metas']
     #arquivo_csv = 'meta_pove_202311.csv'
     caminho = diretorio + arquivo_csv
+    logging.info(f'Arquivo MetaPOVE para tblResultadosEmp:{caminho}')
 
     df = pd.read_csv(caminho, sep=';',encoding='utf8')
     anomes_df = df['DT_ANOMES'].iloc[0]
+    logging.info(f'Anomes DataFrame MetaPOVE para carga em tblResultadosEmp:{anomes_df}')
 
     df = df.drop(columns=['DS_PRODUTO','DS_UGR','DS_GRUPO_INDICADOR','DS_NUMERO_PEDIDO','DS_NUMERO_PEDIDO_ORIG',
                           'VL_OFERTA','CD_ACESSO_GPON','CD_CANAL_SAP','CD_SURVEY','CD_CELULA','DS_VELOCIDADE',
@@ -486,6 +508,12 @@ def prepara_meta_tblResultadosEmpresarial(config, arquivo_csv):
     seg = ['EMPRESARIAL']
     df = df[df['SEGMENTO'].isin(seg)]
 
+
+    df['INDBD'] = df['INDBD'].replace('Gross', 'GROSS')
+    df['INDBD'] = df['INDBD'].replace('gross', 'GROSS')
+    df['INDBD'] = df['INDBD'].replace('Vll', 'VLL')
+    df['INDBD'] = df['INDBD'].replace('vll', 'VLL')
+    
     seg = ['VLL','GROSS']
     df = df[df['INDBD'].isin(seg)]
 
@@ -504,6 +532,7 @@ def prepara_meta_tblResultadosEmpresarial(config, arquivo_csv):
     df.loc[df['CANAL_BOV'].str.contains('PAP P', case=False), 'CANAL_BOV'] = 'PAP Próprio'
     df['CANAL_BOV'] = df['CANAL_BOV'].replace('TELEAGENTES TLV NACIONAL', 'TLV PP')
 
+    logging.info(f'Iniciando criação de CSV do arquivo para tbl_resultadosEMP:({anomes_df})')
     df.to_csv(diretorio+f'tbl_resultadoemp_{anomes_df}.csv',sep=';',
         header=True,
         index=False,
@@ -513,6 +542,7 @@ def prepara_meta_tblResultadosEmpresarial(config, arquivo_csv):
     
     return(df)
 
+
 def carregar_meta_tblResultadosEmpresarial(meta_tblResultadosEmp_df):
     '''
     Receber o dataframe depois de se tratado.
@@ -520,18 +550,19 @@ def carregar_meta_tblResultadosEmpresarial(meta_tblResultadosEmp_df):
     Carregar dataframe na tabela de metas.
     '''
     
-    print (meta_tblResultadosEmp_df.dtypes)
+    #print (meta_tblResultadosEmp_df.dtypes)
 
-    print('tentando converter')
+    #print('tentando converter')
     meta_tblResultadosEmp_df['VALOR'] = [x.replace(',', '.') for x in meta_tblResultadosEmp_df['VALOR']]
     meta_tblResultadosEmp_df['VALOR'] = meta_tblResultadosEmp_df['VALOR'].astype(float)
     
-    print (meta_tblResultadosEmp_df.dtypes)
+    #print (meta_tblResultadosEmp_df.dtypes)
     
     anomes_df = meta_tblResultadosEmp_df['DATA'].iloc[0]
 
+    logging.info(f'Apagando META de tbl_re_baseresultados_empresarial para data:{anomes_df}')
     comando_sql = (
-        f'delete from dbo.tbl_re_baseresultados_empresarial where data = {anomes_df}'
+        f"delete from dbo.tbl_re_baseresultados_empresarial where data = {anomes_df} and TIPO_INDICADOR = 'meta'"
     )
     executar_sql(comando_sql)
 
@@ -562,7 +593,7 @@ def carregar_meta_tblResultadosEmpresarial(meta_tblResultadosEmp_df):
 
 config = configparser.ConfigParser()
 config.read('auto_lobao/config.ini', encoding='utf-8')
-arquivo_csv = 'meta_pove_202311.csv'
+#arquivo_csv = 'meta_pove_202311.csv'
 
 #meta_tblResultados_df = prepara_meta_tblResultados(config, arquivo_csv)
 #carregar_meta_tblResultados(meta_tblResultados_df)
