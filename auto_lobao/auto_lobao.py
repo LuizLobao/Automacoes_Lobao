@@ -214,13 +214,20 @@ def carga_meta_pove():
     criar_arquivo_zip(caminho_pove, caminhopovezip)
     os.remove(caminho_pove)
 
+def carga_meta_tblresultados():
+    arquivo_csv = f'meta_pove_{AAAAMM}.csv'
+    meta_tblResultados_df = prepara_meta_tblResultados(config, arquivo_csv)
+    carregar_meta_tblResultados(meta_tblResultados_df)
+    
+    meta_tblResultadosEmp_df = prepara_meta_tblResultadosEmpresarial(config, arquivo_csv)
+    carregar_meta_tblResultadosEmpresarial(meta_tblResultadosEmp_df)
 
 def main():
     logging.info('Inicio da Execucao')
     # Seu código principal começa aqui
 
     opcaoSelecionada = 0
-    while opcaoSelecionada != 20:
+    while opcaoSelecionada != 99:
         opcaoSelecionada = menu()
         if opcaoSelecionada == '1':
             print(
@@ -263,35 +270,40 @@ def main():
             print('opção 8 selecionada...EM DESENVOLVIMENTO')
             a = input('Tecle qualquer tecla para continuar...')
 
-        elif opcaoSelecionada == '9':
-            print('opção 9 selecionada...(Procedures Receita Contratada)')
+        elif opcaoSelecionada == '10':
+            print('opção 10 selecionada...(Procedures Receita Contratada)')
             rotinas_receita_contratada()
             a = input('Tecle qualquer tecla para continuar...')
 
-        elif opcaoSelecionada == '10':
+        elif opcaoSelecionada == '11':
             print(
-                'opção 10 selecionada...(Criar Arquivo de Ofertas vs DE-PARA)'
+                'opção 11 selecionada...(Criar Arquivo de Ofertas vs DE-PARA)'
             )
             criar_arquivo_ofertas_vs_depara_ticket()
             a = input('Tecle qualquer tecla para continuar...')
 
-        elif opcaoSelecionada == '11':
-            print('opção 11 selecionada...(Carga Meta Diaria)')
+        elif opcaoSelecionada == '20':
+            print('opção 20 selecionada...(Carga Meta Diaria)')
             carga_meta_diaria()
             a = input('Tecle qualquer tecla para continuar...')
         
-        elif opcaoSelecionada == '12':
-            print('opção 11 selecionada...(Carga Meta POVE)')
+        elif opcaoSelecionada == '21':
+            print('opção 21 selecionada...(Carga Meta POVE)')
             carga_meta_pove()
             a = input('Tecle qualquer tecla para continuar...')
 
-        elif opcaoSelecionada == '15':
-            print('opção 15 selecionada...(Envia Lista de PDV Outros)')
+        elif opcaoSelecionada == '22':
+            print('opção 22 selecionada...(Carga Meta nas TablResultados)')
+            carga_meta_tblresultados()
+            a = input('Tecle qualquer tecla para continuar...')
+
+        elif opcaoSelecionada == '30':
+            print('opção 30 selecionada...(Envia Lista de PDV Outros)')
             enviar_lista_pdv_outros()
             a = input('Tecle qualquer tecla para continuar...')
 
-        elif opcaoSelecionada == '20':
-            print('Opção 20...SAIR')
+        elif opcaoSelecionada == '99':
+            print('Opção 99...SAIR')
             logging.info('Opcao SAIR selecionada no menu.')
             subprocess.run('cls', shell=True)
             break
