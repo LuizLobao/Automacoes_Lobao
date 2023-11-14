@@ -367,11 +367,11 @@ def prepara_meta_tblResultados(config, arquivo_csv):
     seg = ['VAREJO']
     df = df[df['SEGMENTO'].isin(seg)]
 
-
-    df['INDBD'] = df['INDBD'].replace('Gross', 'GROSS')
-    df['INDBD'] = df['INDBD'].replace('gross', 'GROSS')
-    df['INDBD'] = df['INDBD'].replace('Vll', 'VLL')
-    df['INDBD'] = df['INDBD'].replace('vll', 'VLL')
+    df['INDBD'] = df['INDBD'].str.upper()
+    #df['INDBD'] = df['INDBD'].replace('Gross', 'GROSS')
+    #df['INDBD'] = df['INDBD'].replace('gross', 'GROSS')
+    #df['INDBD'] = df['INDBD'].replace('Vll', 'VLL')
+    #df['INDBD'] = df['INDBD'].replace('vll', 'VLL')
 
     seg = ['VLL','GROSS']
     df = df[df['INDBD'].isin(seg)]
@@ -509,10 +509,10 @@ def prepara_meta_tblResultadosEmpresarial(config, arquivo_csv):
     df = df[df['SEGMENTO'].isin(seg)]
 
 
-    df['INDBD'] = df['INDBD'].replace('Gross', 'GROSS')
-    df['INDBD'] = df['INDBD'].replace('gross', 'GROSS')
-    df['INDBD'] = df['INDBD'].replace('Vll', 'VLL')
-    df['INDBD'] = df['INDBD'].replace('vll', 'VLL')
+    df['INDBD'] = df['INDBD'].str.upper()
+    #df['INDBD'] = df['INDBD'].replace('gross', 'GROSS')
+    #df['INDBD'] = df['INDBD'].replace('Vll', 'VLL')
+    #df['INDBD'] = df['INDBD'].replace('vll', 'VLL')
     
     seg = ['VLL','GROSS']
     df = df[df['INDBD'].isin(seg)]
