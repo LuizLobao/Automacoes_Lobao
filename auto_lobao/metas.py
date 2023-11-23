@@ -125,6 +125,8 @@ def prepara_meta_pove(config):
         meta_pove_df['DS_NUMERO_PEDIDO'] = np.nan
         meta_pove_df['DS_NUMERO_PEDIDO_ORIG'] = np.nan
         meta_pove_df['VL_OFERTA'] = np.nan
+        meta_pove_df['DS_SEGMENTACAO'] = np.nan
+        meta_pove_df['DS_CLASS_CELULA'] = np.nan
 
         #renomear o nome das colunas
         logging.info('Prepara_Meta_Pove: Renomear colunas')
@@ -147,7 +149,7 @@ def prepara_meta_pove(config):
                                     ,'NO_CURTO_TERRITORIO','NO_MUNICIPIO','nu_localidade','DS_CAMPANHA'
                                     ,'DS_OFERTA','DS_CANAL_BOV','CD_CANAL_SAP_ORI','CD_CANAL_SAP','CD_SURVEY'
                                     ,'CD_CELULA','DS_VELOCIDADE','DS_NUMERO_PEDIDO','DS_NUMERO_PEDIDO_ORIG','VL_OFERTA'
-                                    ,'DT_ANOMES','QTD']]
+                                    ,'DT_ANOMES','QTD','DS_SEGMENTACAO','DS_CLASS_CELULA']]
         return meta_pove_df
     
     except Exception as e:
