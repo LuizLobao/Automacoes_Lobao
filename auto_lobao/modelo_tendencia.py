@@ -34,7 +34,7 @@ def puxa_deflac_ref():
 						a.[DS_PRODUTO]
 						,a.[DS_UNIDADE_NEGOCIO]
 						,CASE when b.DS_GESTAO = 'GESTAO NACIONAL' and DS_CANAL_FINAL in ('TLV RECEPTIVO','TLV ATIVO','TLV PP') then 'TLV'
-							when b.DS_GESTAO = 'GESTAO NACIONAL' and DS_CANAL_FINAL in ('WEB') then 'WEB'
+							when b.DS_GESTAO = 'GESTAO NACIONAL' and DS_CANAL_FINAL like ('%WEB%') then 'WEB'
 							when b.DS_GESTAO = 'GESTAO REGIONAL' then c.COD_REGIONAL
 							else b.DS_GESTAO
 							END  AS GESTAO
@@ -58,7 +58,7 @@ def puxa_deflac_ref():
 						[DS_PRODUTO]
 						,[DS_UNIDADE_NEGOCIO]
 						,CASE when b.DS_GESTAO = 'GESTAO NACIONAL' and DS_CANAL_FINAL in ('TLV RECEPTIVO','TLV ATIVO','TLV PP') then 'TLV'
-							when b.DS_GESTAO = 'GESTAO NACIONAL' and DS_CANAL_FINAL in ('WEB') then 'WEB'
+							when b.DS_GESTAO = 'GESTAO NACIONAL' and DS_CANAL_FINAL like ('%WEB%') then 'WEB'
 							when b.DS_GESTAO = 'GESTAO REGIONAL' then c.COD_REGIONAL
 							else b.DS_GESTAO
 							END 
@@ -173,7 +173,7 @@ def inserir_dados_tendencia(conexao):
 			,a.[DS_PRODUTO]
 			,a.[DS_UNIDADE_NEGOCIO]
 			,CASE when b.DS_GESTAO = 'GESTAO NACIONAL' and DS_CANAL_FINAL in ('TLV RECEPTIVO','TLV ATIVO','TLV PP') then 'TLV'
-				  when b.DS_GESTAO = 'GESTAO NACIONAL' and DS_CANAL_FINAL in ('WEB') then 'WEB'
+				  when b.DS_GESTAO = 'GESTAO NACIONAL' and DS_CANAL_FINAL like ('%WEB%') then 'WEB'
 				  when b.DS_GESTAO = 'GESTAO REGIONAL' then c.COD_REGIONAL
 				  else b.DS_GESTAO
 				  END  AS GESTAO
@@ -188,7 +188,7 @@ def inserir_dados_tendencia(conexao):
 			,CONVERT(DATE,[DT_REFERENCIA],103)
 			,[DS_UNIDADE_NEGOCIO]
 			,CASE when b.DS_GESTAO = 'GESTAO NACIONAL' and DS_CANAL_FINAL in ('TLV RECEPTIVO','TLV ATIVO','TLV PP') then 'TLV'
-				  when b.DS_GESTAO = 'GESTAO NACIONAL' and DS_CANAL_FINAL in ('WEB') then 'WEB'
+				  when b.DS_GESTAO = 'GESTAO NACIONAL' and DS_CANAL_FINAL like ('%WEB%') then 'WEB'
 				  when b.DS_GESTAO = 'GESTAO REGIONAL' then c.COD_REGIONAL
 				  else b.DS_GESTAO
 				  END

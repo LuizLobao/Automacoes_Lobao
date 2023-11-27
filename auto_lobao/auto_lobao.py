@@ -223,6 +223,7 @@ def carga_meta_tblresultados():
     carregar_meta_tblResultadosEmpresarial(meta_tblResultadosEmp_df)
 
 def main():
+    logging.info('--------------------------------------------------')
     logging.info('Inicio da Execucao')
     # Seu código principal começa aqui
 
