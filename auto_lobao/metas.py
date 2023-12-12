@@ -53,6 +53,9 @@ def prepara_meta_pove(config):
         meta_pove_df['Tipo'] = meta_pove_df['Tipo'].replace('Migração', 'MIG BASE')
         meta_pove_df['Gestão'] = meta_pove_df['Gestão'].replace('TELEAGENTES TLV NACIONAL', 'TLV PP')
         meta_pove_df['Canal'] = meta_pove_df['Canal'].replace('Canais de Base', 'OUTROS')
+        meta_pove_df['VALUE STREAM'] = meta_pove_df['VALUE STREAM'].replace('Massivo', 'MASSIVO')
+        meta_pove_df['VALUE STREAM'] = meta_pove_df['VALUE STREAM'].replace('Alto Valor', 'ALTO VALOR')
+        meta_pove_df['VALUE STREAM'] = meta_pove_df['VALUE STREAM'].replace('Empresarial', 'NMEI')
 
         #Filtrar apenas as UGRs que usamos para nossos relatórios
         logging.info('Prepara_Meta_Pove: Aplicando Filtros')
@@ -125,7 +128,7 @@ def prepara_meta_pove(config):
         meta_pove_df['DS_NUMERO_PEDIDO'] = np.nan
         meta_pove_df['DS_NUMERO_PEDIDO_ORIG'] = np.nan
         meta_pove_df['VL_OFERTA'] = np.nan
-        meta_pove_df['DS_SEGMENTACAO'] = np.nan
+        #meta_pove_df['DS_SEGMENTACAO'] = np.nan
         meta_pove_df['DS_CLASS_CELULA'] = np.nan
 
         #renomear o nome das colunas
@@ -139,7 +142,8 @@ def prepara_meta_pove(config):
                                      'Canal':'DS_CANAL_BOV',
                                      'INDB':'DS_INDICADOR',
                                      'Meta':'QTD',
-                                     'Anomes':'DT_ANOMES'})
+                                     'Anomes':'DT_ANOMES',
+                                     'VALUE STREAM':'DS_SEGMENTACAO'})
 
         #colocar as colunas na ordem necessária
         logging.info('Prepara_Meta_Pove: Colocar colunas na ordem correta')
