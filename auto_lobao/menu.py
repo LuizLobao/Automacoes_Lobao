@@ -1,5 +1,8 @@
 import subprocess
 
+from datetime import datetime, timedelta
+
+hoje = (datetime.today() - timedelta(days=0)).strftime('%d/%m/%Y')
 
 def menu():
     subprocess.run('cls', shell=True)
@@ -7,7 +10,7 @@ def menu():
         '----------------- Menu de Automações de Atividades -----------------'
     )
     print('')
-    print(f'Data de Hoje: ')
+    print(f'Data de Hoje: {hoje}')
     print(
         '--------------- Atividades Relacionadas a Tendência -----------------'
     )
