@@ -20,10 +20,10 @@ AAAAMM = (datetime.today()).strftime('%Y%m')
 AAAAMM_ant = (datetime.today()- relativedelta(months=1)).strftime('%Y%m')
 AAAAMMDD = (datetime.today()).strftime('%Y%m%d')
 ultimo_dia_do_mes = (
-    data_referencia.replace(day=1) + timedelta(days=32)
+    data_referencia.replace(day=1) + timedelta(days=31)
 ).replace(day=1) - timedelta(days=1)
 dias_faltando = (ultimo_dia_do_mes - data_referencia).days
-
+print(f'Ultimo dia do mês: {ultimo_dia_do_mes}')
 
 def puxa_deflac_ref():
 
@@ -233,6 +233,7 @@ def exportar_dados_tendencia_para_csv(conexao):
 
 def puxa_dados_real():
     try:
+        print(f'Ultimo dia do mês: {ultimo_dia_do_mes}')
         conexao = criar_conexao()
         excluir_tabela_tendencia(conexao)
         inserir_dados_tendencia(conexao)
@@ -395,6 +396,7 @@ def filtraDF_e_CalculaTendencia(
     base, indicador, PRODUTO, UNIDADE_NEGOCIO, GESTAO
 ):
     df_b = filtra_df(base, indicador, PRODUTO, UNIDADE_NEGOCIO, GESTAO)
+    
 
     dias_ate_fim_mes = dias_faltando
     CalculaTendencia(
