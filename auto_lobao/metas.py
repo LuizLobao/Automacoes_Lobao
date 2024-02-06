@@ -214,7 +214,9 @@ def prepara_meta_diaria(config):
                 'ORIGEM',
                 'TIPO',
                 'SEGMENTO',
+                'VALUE STREAM',
                 'GESTAO',
+                'CANAL',
                 'FILIAL',
                 'MUNICIPIO',
                 'INDICADOR',
@@ -228,9 +230,19 @@ def prepara_meta_diaria(config):
         meta_diaria_df['SEGMENTO'] = meta_diaria_df['SEGMENTO'].replace('VA', 'VAREJO')
         meta_diaria_df['SEGMENTO'] = meta_diaria_df['SEGMENTO'].replace('EM', 'EMPRESARIAL')
         meta_diaria_df['GESTAO'] = meta_diaria_df['GESTAO'].replace('TELEAGENTES TLV NACIONAL', 'TLV PP')
+        
+        meta_diaria_df['CANAL'] = meta_diaria_df['CANAL'].replace('Canais de Base', 'OUTROS')
+        meta_diaria_df['CANAL'] = meta_diaria_df['CANAL'].replace('TELEAGENTES TLV NACIONAL', 'TLV PP')
         meta_diaria_df['DIA'] = meta_diaria_df['DIA'].str.replace('D0', '')
         meta_diaria_df['DIA'] = meta_diaria_df['DIA'].str.replace('D', '')
+
+        meta_diaria_df['VALUE STREAM'] = meta_diaria_df['VALUE STREAM'].replace('Massivo', 'MASSIVO')
+        meta_diaria_df['VALUE STREAM'] = meta_diaria_df['VALUE STREAM'].replace('Alto Valor', 'ALTO VALOR')
+        meta_diaria_df['VALUE STREAM'] = meta_diaria_df['VALUE STREAM'].replace('Empresarial', 'NMEI')
     
+
+        meta_diaria_df = meta_diaria_df.rename(columns={'VALUE STREAM':'VALUE_STREAM'})
+                                                    
         return meta_diaria_df
 
     except Exception as e:
