@@ -43,7 +43,7 @@ def roda_modelo_tendencia():
     df = puxa_dados_para_simular()
     produtos = ['FIBRA', 'NOVA FIBRA']
     segmentos = ['VAREJO', 'EMPRESARIAL']
-    gestao = ['RSE', 'RCS', 'RNN', 'TLV', 'WEB', 'OUTROS NACIONAIS']
+    gestao = ['RSE', 'RCS', 'RNN', 'RSP', 'TLV', 'WEB', 'OUTROS NACIONAIS']
 
     for produto in produtos:
         for segmento in segmentos:
