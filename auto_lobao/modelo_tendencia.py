@@ -246,7 +246,7 @@ def puxa_dados_real():
 
 def puxa_dados_para_simular():
 
-    data_inicio = '2023-06-01'
+    data_inicio = '2023-01-01'
     comando_sql = f"""
 					select 
 						CONVERT(DATE,[DATA],103) AS DATA
